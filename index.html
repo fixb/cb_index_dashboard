@@ -442,6 +442,8 @@ function cbPricerURL(d){
   add('rv',V(d['Input Vol.']));
   add('spread',V(d['Credit Spread']));
   add('q',V(d['Equity Yield']));
+  add('targetConvPrem',V(d['Conversion Premium']));
+  add('targetIvPrem',V(d['Prem to Inv Val']));
   return CB_PRICER_URL+'?'+p.toString();
 }
 function _yr(s){var m=/^(\d{4})/.exec(String(s||''));return m?+m[1]:null;}
