@@ -444,6 +444,10 @@ function cbPricerURL(d){
   add('q',V(d['Equity Yield']));
   add('targetConvPrem',V(d['Conversion Premium']));
   add('targetIvPrem',V(d['Prem to Inv Val']));
+  add('ftse_cb',V(d['Convertible Price']));
+  add('ftse_parity',V(d.Parity));
+  add('ftse_theo',V(d['Theo. Price']));
+  add('ftse_bf',V(d['Inv Value']));
   return CB_PRICER_URL+'?'+p.toString();
 }
 function _yr(s){var m=/^(\d{4})/.exec(String(s||''));return m?+m[1]:null;}
