@@ -52,6 +52,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1.5rem}
 .card-header{padding:0.9rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem}
 .card-header h3{font-size:0.82rem;font-weight:600}.card-header .tag{font-size:0.62rem;font-weight:500;color:var(--text-dim);background:var(--surface2);padding:0.15rem 0.5rem;border-radius:3px}
+.card-header .tag.tag-green{color:var(--green);background:rgba(52,211,153,0.12);font-weight:700;font-size:0.72rem}
 .card-body{padding:1.2rem}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}@media(max-width:900px){.grid-2{grid-template-columns:1fr}}
 .data-table{width:100%;border-collapse:collapse;font-size:0.72rem}
@@ -60,6 +61,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .data-table td{padding:0.45rem 0.7rem;border-bottom:1px solid rgba(30,41,59,0.5);font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--text-muted);white-space:nowrap}
 .data-table td.name-cell{font-family:'DM Sans',sans-serif;font-weight:500;color:var(--text);font-size:0.72rem}
 .data-table tr:hover td{background:rgba(96,165,250,0.04)}
+.data-table td:first-child{position:sticky;left:0;background:var(--surface);z-index:1;box-shadow:1px 0 0 var(--border)}
+.data-table th:first-child{left:0;z-index:3;box-shadow:1px 0 0 var(--border)}
+.data-table tr:hover td:first-child{background:#162033}
 .num-pos{color:var(--green)}.num-neg{color:var(--red)}
 .bar-row{display:flex;align-items:center;gap:0.7rem;margin-bottom:0.45rem}
 .bar-label{font-size:0.7rem;color:var(--text-muted);min-width:120px;text-align:right;flex-shrink:0}
@@ -87,6 +91,46 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .comp-card .comp-new{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;color:var(--text)}
 .comp-card .comp-chg{font-family:'JetBrains Mono',monospace;font-size:0.75rem;margin-top:0.3rem}
 .chg-up{color:var(--green)}.chg-down{color:var(--red)}.chg-flat{color:var(--text-dim)}
+@media(max-width:820px){
+  .header{padding:1rem 1rem 0.8rem;gap:0.6rem}
+  .header-left h1{font-size:1.15rem}.header-left .subtitle{font-size:0.72rem}
+  .tabs{padding:0 0.7rem}.tab{padding:0.6rem 0.8rem;font-size:0.72rem}
+  .content{padding:1rem 0.8rem 2rem}
+  .card-header{padding:0.7rem 0.9rem}.card-body{padding:0.9rem}
+  .card-header h3{font-size:0.78rem}
+  .grid-2{grid-template-columns:1fr;gap:1rem}
+  .kpi-strip{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
+  .kpi{padding:0.6rem 0.7rem}.kpi .value{font-size:1rem}
+  .chart-wrap{height:230px}
+  .filter-bar input,.filter-bar select{font-size:0.8rem;padding:0.55rem 0.7rem}
+  .scroll-y-table{max-height:55vh}
+}
+@media(max-width:480px){
+  .header{padding:0.8rem 0.7rem;flex-direction:column;align-items:flex-start}
+  .header-right{width:100%;justify-content:flex-start}
+  .header-left h1{font-size:1rem}.header-left .subtitle{font-size:0.68rem}
+  .tabs{padding:0 0.4rem}.tab{padding:0.55rem 0.65rem;font-size:0.68rem}
+  .content{padding:0.8rem 0.5rem 2rem}
+  .card{border-radius:8px;margin-bottom:1rem}
+  .card-header{padding:0.6rem 0.7rem;flex-direction:column;align-items:flex-start;gap:0.4rem}
+  .card-body{padding:0.7rem}
+  .card-header h3{font-size:0.78rem}.card-header .tag{font-size:0.6rem}
+  .card-header .tag.tag-green{font-size:0.68rem}
+  .btn{padding:0.45rem 0.6rem;font-size:0.66rem}
+  .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  .kpi{padding:0.55rem 0.5rem}.kpi .label{font-size:0.55rem}.kpi .value{font-size:0.92rem}
+  .chart-wrap{height:200px}
+  .bar-label{min-width:90px;font-size:0.62rem}
+  .filter-bar{gap:0.5rem}.filter-bar input,.filter-bar select{min-width:0;width:100%;font-size:0.85rem}
+  .data-table{font-size:0.65rem}.data-table th{font-size:0.56rem;padding:0.45rem 0.5rem}
+  .data-table td{font-size:0.62rem;padding:0.4rem 0.5rem}
+  .data-table td.name-cell{font-size:0.66rem}
+  .scroll-y-table{max-height:60vh}
+  .heat-table th,.heat-table td{padding:0.35rem 0.4rem;font-size:0.6rem}
+  .comp-summary{grid-template-columns:1fr 1fr;gap:0.6rem}
+  .comp-card{padding:0.6rem}.comp-card .comp-old,.comp-card .comp-new{font-size:0.8rem}
+  #landing{padding:1rem}#landing h1{font-size:1.4rem}
+}
 </style>
 
 </head>
@@ -110,7 +154,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="panel active" id="panel-overview"><div class="grid-2"><div class="card"><div class="card-header"><h3>Répartition sectorielle</h3><span class="tag">poids %</span></div><div class="card-body" id="sectorBars"></div></div><div class="card"><div class="card-header"><h3>Répartition par région</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="regionPie"></canvas></div></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Répartition par devise</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="ccyPie"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Top 15 — Poids</h3></div><div class="card-body" id="topWeightBars"></div></div></div></div>
     <div class="panel" id="panel-greeks"><div class="card"><div class="card-header"><h3>Heatmap grecques pondérées par secteur</h3></div><div class="card-body scroll-x" id="greeksHeatmap"></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Delta vs Poids</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="deltaWeightChart"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Gamma par secteur</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="gammaChart"></canvas></div></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Vega par secteur</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="vegaChart"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Rho par secteur</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="rhoChart"></canvas></div></div></div></div></div>
     <div class="panel" id="panel-geo"><div class="card"><div class="card-header"><h3>Exposition par pays</h3></div><div class="card-body scroll-x" id="countryHeatmap"></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Delta par région</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="regionDeltaChart"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Spread par région</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="regionSpreadChart"></canvas></div></div></div></div></div>
-    <div class="panel" id="panel-constituents"><div class="card"><div class="card-header"><h3>Constituants</h3><div style="display:flex;align-items:center;gap:0.7rem;flex-wrap:wrap"><span class="tag" id="countTag"></span><span class="tag" id="sizeTag"></span><button class="btn btn-accent" onclick="exportCSV()">⬇ CSV</button><button class="btn btn-green" onclick="exportXLSX()">⬇ Excel</button><button class="btn" onclick="copyCSV()">📋 Copier</button></div></div><div class="card-body"><div class="filter-bar"><input type="text" id="searchInput" placeholder="Rechercher..."><select id="filterSector"><option value="">Tous secteurs</option></select><select id="filterRegion"><option value="">Toutes régions</option></select><select id="filterCcy"><option value="">Toutes devises</option></select></div><div class="scroll-x scroll-y-table"><table class="data-table" id="mainTable"><thead><tr><th data-sort="_dn">Instrument</th><th data-sort="Sector">Secteur</th><th data-sort="Country">Pays</th><th data-sort="Bond Currency">Devise</th><th data-sort="Convertible Price">Prix CB</th><th data-sort="Index Weight">Poids %</th><th data-sort="Market Cap (USDm)">MV (USDm)</th><th data-sort="Delta">Delta</th><th data-sort="Gamma">Gamma</th><th data-sort="Vega">Vega</th><th data-sort="Rho (10bp)">Rho</th><th data-sort="Credit Spread">Spread</th><th data-sort="Implied Vol.">Vol Impl.</th><th data-sort="Input Vol.">Vol Input</th><th data-sort="Conversion Premium">Prime %</th><th data-sort="Parity">Parité</th><th data-sort="Duration">Duration</th></tr></thead><tbody id="tableBody"></tbody></table></div></div></div></div>
+    <div class="panel" id="panel-constituents"><div class="card"><div class="card-header"><h3>Constituants</h3><div style="display:flex;align-items:center;gap:0.7rem;flex-wrap:wrap"><span class="tag" id="countTag"></span><span class="tag tag-green" id="sizeTag"></span><button class="btn btn-accent" onclick="exportCSV()">⬇ CSV</button><button class="btn btn-green" onclick="exportXLSX()">⬇ Excel</button><button class="btn" onclick="copyCSV()">📋 Copier</button></div></div><div class="card-body"><div class="filter-bar"><input type="text" id="searchInput" placeholder="Rechercher..."><select id="filterSector"><option value="">Tous secteurs</option></select><select id="filterRegion"><option value="">Toutes régions</option></select><select id="filterCcy"><option value="">Toutes devises</option></select></div><div class="scroll-x scroll-y-table"><table class="data-table" id="mainTable"><thead><tr><th data-sort="_dn">Instrument</th><th data-sort="Sector">Secteur</th><th data-sort="Country">Pays</th><th data-sort="Bond Currency">Devise</th><th data-sort="Convertible Price">Prix CB</th><th data-sort="Index Weight">Poids %</th><th data-sort="Market Cap (USDm)">MV (USDm)</th><th data-sort="Delta">Delta</th><th data-sort="Gamma">Gamma</th><th data-sort="Vega">Vega</th><th data-sort="Rho (10bp)">Rho</th><th data-sort="Credit Spread">Spread</th><th data-sort="Implied Vol.">Vol Impl.</th><th data-sort="Input Vol.">Vol Input</th><th data-sort="Conversion Premium">Prime %</th><th data-sort="Parity">Parité</th><th data-sort="Duration">Duration</th></tr></thead><tbody id="tableBody"></tbody></table></div></div></div></div>
     <div class="panel" id="panel-distribution"><div class="grid-2"><div class="card"><div class="card-header"><h3>Distribution Deltas</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="deltaHist"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Distribution Spreads</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="spreadHist"></canvas></div></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Distribution Primes</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="premiumHist"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Distribution Vol Impl.</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="volHist"></canvas></div></div></div></div><div class="card"><div class="card-header"><h3>Scatter Delta vs Prime</h3><span class="tag">taille=poids</span></div><div class="card-body"><div class="chart-wrap" style="height:360px"><canvas id="scatterChart"></canvas></div></div></div></div>
     <div class="panel" id="panel-compare"><div id="compUploadArea" style="border:2px dashed #334155;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;margin-bottom:1.5rem;transition:all 0.3s"><div style="font-size:1.5rem;margin-bottom:0.5rem">📈</div><div style="font-size:0.9rem;font-weight:600;color:#e2e8f0">Charger un fichier de comparaison</div><div style="font-size:0.7rem;color:#64748b;margin-top:0.3rem">.xls / .xlsx — glissez ou cliquez</div></div><div class="comp-summary" id="compSummary"></div><div class="card"><div class="card-header"><h3>Waterfall — Variation grecques par secteur</h3><div class="btn-group" id="compMetricBtns"><button class="btn btn-accent active" data-m="Delta" onclick="switchWF('Delta')">Delta</button><button class="btn" data-m="Gamma" onclick="switchWF('Gamma')">Gamma</button><button class="btn" data-m="Vega" onclick="switchWF('Vega')">Vega</button><button class="btn" data-m="Rho (10bp)" onclick="switchWF('Rho (10bp)')">Rho</button><button class="btn" data-m="Credit Spread" onclick="switchWF('Credit Spread')">Spread</button><button class="btn" data-m="Implied Vol." onclick="switchWF('Implied Vol.')">Vol Impl.</button></div></div><div class="card-body"><div class="chart-wrap" style="height:360px"><canvas id="wfChart"></canvas></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Δ Poids par secteur</h3></div><div class="card-body"><div class="chart-wrap" style="height:320px"><canvas id="wfWeightSec"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Δ Poids par région</h3></div><div class="card-body"><div class="chart-wrap" style="height:320px"><canvas id="wfWeightReg"></canvas></div></div></div></div><div class="card"><div class="card-header"><h3>Détail changements</h3><div class="btn-group"><button class="btn btn-accent" onclick="exportCompCSV()">⬇ CSV</button><button class="btn" onclick="copyCompCSV()">📋 Copier</button></div></div><div class="card-body scroll-x scroll-y-table" id="compTableWrap"></div></div></div>
   </div>
