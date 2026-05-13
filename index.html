@@ -294,6 +294,7 @@ function parseFile(file,cb){
         var isin=obj['ISIN'];
         if(isin&&typeof isin==='string'&&isin.length>5){
           if(obj['Maturity'] instanceof Date)obj['Maturity']=obj['Maturity'].toISOString().substring(0,10);
+          if(obj['Issue Date'] instanceof Date)obj['Issue Date']=obj['Issue Date'].toISOString().substring(0,10);
           obj._dn=dn(obj);
           data.push(obj);
         }
@@ -450,7 +451,7 @@ function cbPricerURL(d){
   add('ftse_bf',V(d['Inv Value']));
   return CB_PRICER_URL+'?'+p.toString();
 }
-function _yr(s){var m=/^(\d{4})/.exec(String(s||''));return m?+m[1]:null;}
+function _yr(s){if(s instanceof Date)return s.getFullYear();var m=/^(\d{4})/.exec(String(s||''));return m?+m[1]:null;}
 function setupScatterDualRange(prefix,minV,maxV,step,fmt){
   var mn=document.getElementById('sf'+prefix+'Min'),mx=document.getElementById('sf'+prefix+'Max');
   var nMn=document.getElementById('sf'+prefix+'MinNum'),nMx=document.getElementById('sf'+prefix+'MaxNum');
