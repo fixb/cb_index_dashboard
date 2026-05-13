@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -165,49 +165,49 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 <body>
 <div id="landing">
   <h1>FTSE Convertible Bond Index</h1>
-  <p class="sub">Chargez un ou deux fichiers pour démarrer l'analyse</p>
+  <p class="sub">Load one or two files to start the analysis</p>
   <div class="upload-grid">
-    <div class="upload-box" id="box1"><div class="icon">📊</div><div class="title">Date 1 (principale)</div><div class="hint">.xls / .xlsx — format FTSE</div><div class="status" id="status1"></div><div class="err" id="err1"></div></div>
-    <div class="upload-box" id="box2"><div class="icon">📈</div><div class="title">Date 2 (comparaison)</div><div class="hint">Optionnel — même format</div><div class="status" id="status2"></div><div class="err" id="err2"></div></div>
+    <div class="upload-box" id="box1"><div class="icon">📊</div><div class="title">Date 1 (primary)</div><div class="hint">.xls / .xlsx — FTSE format</div><div class="status" id="status1"></div><div class="err" id="err1"></div></div>
+    <div class="upload-box" id="box2"><div class="icon">📈</div><div class="title">Date 2 (comparison)</div><div class="hint">Optional — same format</div><div class="status" id="status2"></div><div class="err" id="err2"></div></div>
   </div>
-  <p class="or-text">Date 2 est optionnelle — l'onglet Comparaison s'activera si deux fichiers sont chargés</p>
-  <button class="launch-btn" id="launchBtn" onclick="launchDashboard()">Lancer le dashboard</button>
-  <div id="loadStatus">Chargement des librairies...</div>
+  <p class="or-text">Date 2 is optional — the Comparison tab will activate if both files are loaded</p>
+  <button class="launch-btn" id="launchBtn" onclick="launchDashboard()">Launch dashboard</button>
+  <div id="loadStatus">Loading libraries...</div>
 </div>
 <div id="dashboard">
   <div class="header"><div class="header-left"><h1>FTSE Convertible Bond Index</h1><div class="subtitle" id="headerSub">Global Focus (USD)</div></div><div class="header-right"><div class="file-chip"><span class="dot" style="background:var(--accent)"></span><span id="chipLabel1">D1</span></div><div class="file-chip" id="chip2" style="display:none"><span class="dot" style="background:var(--accent2)"></span><span id="chipLabel2">D2</span></div><button class="btn btn-accent" onclick="resetDashboard()">↻ Import</button></div></div>
   <div class="kpi-strip" id="kpiStrip"></div>
-  <div class="tabs"><div class="tab active" data-tab="overview">Vue d'ensemble</div><div class="tab" data-tab="greeks">Grecques</div><div class="tab" data-tab="geo">Géographie</div><div class="tab" data-tab="constituents">Constituants</div><div class="tab" data-tab="distribution">Distributions</div><div class="tab" data-tab="compare" id="tabCompare" style="display:none;color:var(--accent2)">⚡ Comparaison</div></div>
+  <div class="tabs"><div class="tab active" data-tab="overview">Overview</div><div class="tab" data-tab="greeks">Greeks</div><div class="tab" data-tab="geo">Geography</div><div class="tab" data-tab="constituents">Constituents</div><div class="tab" data-tab="distribution">Distributions</div><div class="tab" data-tab="compare" id="tabCompare" style="display:none;color:var(--accent2)">⚡ Comparison</div></div>
   <div class="content">
-    <div class="panel active" id="panel-overview"><div class="grid-2"><div class="card"><div class="card-header"><h3>Répartition sectorielle</h3><span class="tag">poids %</span></div><div class="card-body" id="sectorBars"></div></div><div class="card"><div class="card-header"><h3>Répartition par région</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="regionPie"></canvas></div></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Répartition par devise</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="ccyPie"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Top 15 — Poids</h3></div><div class="card-body" id="topWeightBars"></div></div></div></div>
-    <div class="panel" id="panel-greeks"><div class="card"><div class="card-header"><h3>Heatmap grecques pondérées par secteur</h3></div><div class="card-body scroll-x" id="greeksHeatmap"></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Delta vs Poids</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="deltaWeightChart"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Gamma par secteur</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="gammaChart"></canvas></div></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Vega par secteur</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="vegaChart"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Rho par secteur</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="rhoChart"></canvas></div></div></div></div></div>
-    <div class="panel" id="panel-geo"><div class="card"><div class="card-header"><h3>Exposition par pays</h3></div><div class="card-body scroll-x" id="countryHeatmap"></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Delta par région</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="regionDeltaChart"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Spread par région</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="regionSpreadChart"></canvas></div></div></div></div><div class="card"><div class="card-header"><h3>Edge to Theo. pondéré par région</h3><span class="tag">pondéré par poids</span></div><div class="card-body"><div class="chart-wrap"><canvas id="regionEdgeChart"></canvas></div></div></div></div>
-    <div class="panel" id="panel-constituents"><div class="card"><div class="card-header"><h3>Constituants</h3><div style="display:flex;align-items:center;gap:0.7rem;flex-wrap:wrap"><span class="tag" id="countTag"></span><span class="tag tag-green" id="sizeTag"></span><button class="btn btn-accent" onclick="exportCSV()">⬇ CSV</button><button class="btn btn-green" onclick="exportXLSX()">⬇ Excel</button><button class="btn" onclick="copyCSV()">📋 Copier</button></div></div><div class="card-body"><div class="filter-bar"><input type="text" id="searchInput" placeholder="Rechercher..."><select id="filterSector"><option value="">Tous secteurs</option></select><select id="filterRegion"><option value="">Toutes régions</option></select><select id="filterCcy"><option value="">Toutes devises</option></select></div><div class="scroll-x scroll-y-table"><table class="data-table" id="mainTable"><thead><tr><th data-sort="_dn">Instrument</th><th data-sort="Sector">Secteur</th><th data-sort="Country">Pays</th><th data-sort="Bond Currency">Devise</th><th data-sort="Convertible Price">Prix CB</th><th data-sort="Index Weight">Poids %</th><th data-sort="Market Cap (USDm)">MV (USDm)</th><th data-sort="Delta">Delta</th><th data-sort="Gamma">Gamma</th><th data-sort="Vega">Vega</th><th data-sort="Rho (10bp)">Rho</th><th data-sort="Credit Spread">Spread</th><th data-sort="Implied Vol.">Vol Impl.</th><th data-sort="Input Vol.">Vol Input</th><th data-sort="Conversion Premium">Prime %</th><th data-sort="Parity">Parité</th><th data-sort="Duration">Duration</th><th title="Ouvrir dans cb_pricer">↗</th></tr></thead><tbody id="tableBody"></tbody></table></div></div></div></div>
-    <div class="panel" id="panel-distribution"><div class="grid-2"><div class="card"><div class="card-header"><h3>Distribution Deltas</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="deltaHist"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Distribution Spreads</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="spreadHist"></canvas></div></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Distribution Primes</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="premiumHist"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Distribution Vol Impl.</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="volHist"></canvas></div></div></div></div><div class="card"><div class="card-header"><h3>Scatter Delta vs Prime</h3><div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap"><span class="tag">taille=poids</span><span class="tag tag-green" id="scatterCount"></span></div></div><div class="card-body">
+    <div class="panel active" id="panel-overview"><div class="grid-2"><div class="card"><div class="card-header"><h3>Sector breakdown</h3><span class="tag">weight %</span></div><div class="card-body" id="sectorBars"></div></div><div class="card"><div class="card-header"><h3>Region breakdown</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="regionPie"></canvas></div></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Currency breakdown</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="ccyPie"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Top 15 — Weight</h3></div><div class="card-body" id="topWeightBars"></div></div></div></div>
+    <div class="panel" id="panel-greeks"><div class="card"><div class="card-header"><h3>Weighted Greeks heatmap by sector</h3></div><div class="card-body scroll-x" id="greeksHeatmap"></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Delta vs Weight</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="deltaWeightChart"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Gamma by sector</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="gammaChart"></canvas></div></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Vega by sector</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="vegaChart"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Rho by sector</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="rhoChart"></canvas></div></div></div></div></div>
+    <div class="panel" id="panel-geo"><div class="card"><div class="card-header"><h3>Country exposure</h3></div><div class="card-body scroll-x" id="countryHeatmap"></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Delta by region</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="regionDeltaChart"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Spread by region</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="regionSpreadChart"></canvas></div></div></div></div><div class="card"><div class="card-header"><h3>Weighted Edge to Theo. by region</h3><span class="tag">weighted by weight</span></div><div class="card-body"><div class="chart-wrap"><canvas id="regionEdgeChart"></canvas></div></div></div></div>
+    <div class="panel" id="panel-constituents"><div class="card"><div class="card-header"><h3>Constituents</h3><div style="display:flex;align-items:center;gap:0.7rem;flex-wrap:wrap"><span class="tag" id="countTag"></span><span class="tag tag-green" id="sizeTag"></span><button class="btn btn-accent" onclick="exportCSV()">⬇ CSV</button><button class="btn btn-green" onclick="exportXLSX()">⬇ Excel</button><button class="btn" onclick="copyCSV()">📋 Copy</button></div></div><div class="card-body"><div class="filter-bar"><input type="text" id="searchInput" placeholder="Search..."><select id="filterSector"><option value="">All sectors</option></select><select id="filterRegion"><option value="">All regions</option></select><select id="filterCcy"><option value="">All currencies</option></select></div><div class="scroll-x scroll-y-table"><table class="data-table" id="mainTable"><thead><tr><th data-sort="_dn">Instrument</th><th data-sort="Sector">Sector</th><th data-sort="Country">Country</th><th data-sort="Bond Currency">Currency</th><th data-sort="Convertible Price">CB Price</th><th data-sort="Index Weight">Weight %</th><th data-sort="Market Cap (USDm)">MV (USDm)</th><th data-sort="Delta">Delta</th><th data-sort="Gamma">Gamma</th><th data-sort="Vega">Vega</th><th data-sort="Rho (10bp)">Rho</th><th data-sort="Credit Spread">Spread</th><th data-sort="Implied Vol.">Impl. Vol.</th><th data-sort="Input Vol.">Input Vol.</th><th data-sort="Conversion Premium">Premium %</th><th data-sort="Parity">Parity</th><th data-sort="Duration">Duration</th><th title="Open in cb_pricer">↗</th></tr></thead><tbody id="tableBody"></tbody></table></div></div></div></div>
+    <div class="panel" id="panel-distribution"><div class="grid-2"><div class="card"><div class="card-header"><h3>Delta distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="deltaHist"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Spread distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="spreadHist"></canvas></div></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Premium distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="premiumHist"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Impl. Vol. distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="volHist"></canvas></div></div></div></div><div class="card"><div class="card-header"><h3>Scatter Delta vs Premium</h3><div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap"><span class="tag">size=weight</span><span class="tag tag-green" id="scatterCount"></span></div></div><div class="card-body">
       <div class="sf-wrap">
         <div class="sf-grid">
           <div class="sf-rng"><div class="sf-head"><span class="sf-label">Credit Spread (bps)</span><span class="sf-val-pair"><input type="number" class="sf-num" id="sfSpreadMinNum"><span>—</span><input type="number" class="sf-num" id="sfSpreadMaxNum"></span></div><div class="sf-dual"><div class="sf-track"></div><div class="sf-fill" id="sfSpreadFill"></div><input type="range" id="sfSpreadMin"><input type="range" id="sfSpreadMax"></div></div>
-          <div class="sf-rng"><div class="sf-head"><span class="sf-label">Duration (années)</span><span class="sf-val-pair"><input type="number" class="sf-num" id="sfDurMinNum"><span>—</span><input type="number" class="sf-num" id="sfDurMaxNum"></span></div><div class="sf-dual"><div class="sf-track"></div><div class="sf-fill" id="sfDurFill"></div><input type="range" id="sfDurMin"><input type="range" id="sfDurMax"></div></div>
+          <div class="sf-rng"><div class="sf-head"><span class="sf-label">Duration (years)</span><span class="sf-val-pair"><input type="number" class="sf-num" id="sfDurMinNum"><span>—</span><input type="number" class="sf-num" id="sfDurMaxNum"></span></div><div class="sf-dual"><div class="sf-track"></div><div class="sf-fill" id="sfDurFill"></div><input type="range" id="sfDurMin"><input type="range" id="sfDurMax"></div></div>
           <div class="sf-rng"><div class="sf-head"><span class="sf-label">Delta</span><span class="sf-val-pair"><input type="number" class="sf-num" id="sfDeltaMinNum"><span>—</span><input type="number" class="sf-num" id="sfDeltaMaxNum"></span></div><div class="sf-dual"><div class="sf-track"></div><div class="sf-fill" id="sfDeltaFill"></div><input type="range" id="sfDeltaMin"><input type="range" id="sfDeltaMax"></div></div>
-          <div class="sf-rng"><div class="sf-head"><span class="sf-label">Prix CB</span><span class="sf-val-pair"><input type="number" class="sf-num" id="sfPriceMinNum"><span>—</span><input type="number" class="sf-num" id="sfPriceMaxNum"></span></div><div class="sf-dual"><div class="sf-track"></div><div class="sf-fill" id="sfPriceFill"></div><input type="range" id="sfPriceMin"><input type="range" id="sfPriceMax"></div></div>
-          <div class="sf-rng"><div class="sf-head"><span class="sf-label">Année maturité</span><span class="sf-val-pair"><input type="number" class="sf-num" id="sfMatMinNum"><span>—</span><input type="number" class="sf-num" id="sfMatMaxNum"></span></div><div class="sf-dual"><div class="sf-track"></div><div class="sf-fill" id="sfMatFill"></div><input type="range" id="sfMatMin"><input type="range" id="sfMatMax"></div></div>
-          <div class="sf-rng"><div class="sf-head"><span class="sf-label">Année émission</span><span class="sf-val-pair"><input type="number" class="sf-num" id="sfIssMinNum"><span>—</span><input type="number" class="sf-num" id="sfIssMaxNum"></span></div><div class="sf-dual"><div class="sf-track"></div><div class="sf-fill" id="sfIssFill"></div><input type="range" id="sfIssMin"><input type="range" id="sfIssMax"></div></div>
-          <div class="sf-rng sf-cell-wide"><div class="sf-head"><span class="sf-label">Secteurs</span></div><div class="sf-chips" id="sfSectorChips"></div></div>
-          <div class="sf-rng sf-cell-wide"><div class="sf-head"><span class="sf-label">Régions</span></div><div class="sf-chips" id="sfRegionChips"></div></div>
+          <div class="sf-rng"><div class="sf-head"><span class="sf-label">CB Price</span><span class="sf-val-pair"><input type="number" class="sf-num" id="sfPriceMinNum"><span>—</span><input type="number" class="sf-num" id="sfPriceMaxNum"></span></div><div class="sf-dual"><div class="sf-track"></div><div class="sf-fill" id="sfPriceFill"></div><input type="range" id="sfPriceMin"><input type="range" id="sfPriceMax"></div></div>
+          <div class="sf-rng"><div class="sf-head"><span class="sf-label">Maturity year</span><span class="sf-val-pair"><input type="number" class="sf-num" id="sfMatMinNum"><span>—</span><input type="number" class="sf-num" id="sfMatMaxNum"></span></div><div class="sf-dual"><div class="sf-track"></div><div class="sf-fill" id="sfMatFill"></div><input type="range" id="sfMatMin"><input type="range" id="sfMatMax"></div></div>
+          <div class="sf-rng"><div class="sf-head"><span class="sf-label">Issue year</span><span class="sf-val-pair"><input type="number" class="sf-num" id="sfIssMinNum"><span>—</span><input type="number" class="sf-num" id="sfIssMaxNum"></span></div><div class="sf-dual"><div class="sf-track"></div><div class="sf-fill" id="sfIssFill"></div><input type="range" id="sfIssMin"><input type="range" id="sfIssMax"></div></div>
+          <div class="sf-rng sf-cell-wide"><div class="sf-head"><span class="sf-label">Sectors</span></div><div class="sf-chips" id="sfSectorChips"></div></div>
+          <div class="sf-rng sf-cell-wide"><div class="sf-head"><span class="sf-label">Regions</span></div><div class="sf-chips" id="sfRegionChips"></div></div>
         </div>
         <div class="sf-toolbar">
-          <span class="sf-toolbar-label">Couleur par :</span>
+          <span class="sf-toolbar-label">Color by:</span>
           <div id="sfColBy" style="display:flex;gap:0.3rem;flex-wrap:wrap">
-            <button class="btn btn-accent" data-by="Sector">Secteur</button>
-            <button class="btn" data-by="Region">Région</button>
-            <button class="btn" data-by="Currency">Devise</button>
+            <button class="btn btn-accent" data-by="Sector">Sector</button>
+            <button class="btn" data-by="Region">Region</button>
+            <button class="btn" data-by="Currency">Currency</button>
           </div>
-          <button class="btn" id="sfReset" style="margin-left:auto">↻ Réinitialiser</button>
+          <button class="btn" id="sfReset" style="margin-left:auto">↻ Reset</button>
         </div>
       </div>
       <div class="chart-wrap" style="height:360px"><canvas id="scatterChart"></canvas></div>
     </div></div></div>
-    <div class="panel" id="panel-compare"><div id="compUploadArea" style="border:2px dashed #334155;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;margin-bottom:1.5rem;transition:all 0.3s"><div style="font-size:1.5rem;margin-bottom:0.5rem">📈</div><div style="font-size:0.9rem;font-weight:600;color:#e2e8f0">Charger un fichier de comparaison</div><div style="font-size:0.7rem;color:#64748b;margin-top:0.3rem">.xls / .xlsx — glissez ou cliquez</div></div><div class="comp-summary" id="compSummary"></div><div class="card"><div class="card-header"><h3>Waterfall — Variation grecques par secteur</h3><div class="btn-group" id="compMetricBtns"><button class="btn btn-accent active" data-m="Delta" onclick="switchWF('Delta')">Delta</button><button class="btn" data-m="Gamma" onclick="switchWF('Gamma')">Gamma</button><button class="btn" data-m="Vega" onclick="switchWF('Vega')">Vega</button><button class="btn" data-m="Rho (10bp)" onclick="switchWF('Rho (10bp)')">Rho</button><button class="btn" data-m="Credit Spread" onclick="switchWF('Credit Spread')">Spread</button><button class="btn" data-m="Implied Vol." onclick="switchWF('Implied Vol.')">Vol Impl.</button></div></div><div class="card-body"><div class="chart-wrap" style="height:360px"><canvas id="wfChart"></canvas></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Δ Poids par secteur</h3></div><div class="card-body"><div class="chart-wrap" style="height:320px"><canvas id="wfWeightSec"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Δ Poids par région</h3></div><div class="card-body"><div class="chart-wrap" style="height:320px"><canvas id="wfWeightReg"></canvas></div></div></div></div><div class="card"><div class="card-header"><h3>Détail changements</h3><div class="btn-group"><button class="btn btn-accent" onclick="exportCompCSV()">⬇ CSV</button><button class="btn" onclick="copyCompCSV()">📋 Copier</button></div></div><div class="card-body scroll-x scroll-y-table" id="compTableWrap"></div></div></div>
+    <div class="panel" id="panel-compare"><div id="compUploadArea" style="border:2px dashed #334155;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;margin-bottom:1.5rem;transition:all 0.3s"><div style="font-size:1.5rem;margin-bottom:0.5rem">📈</div><div style="font-size:0.9rem;font-weight:600;color:#e2e8f0">Load a comparison file</div><div style="font-size:0.7rem;color:#64748b;margin-top:0.3rem">.xls / .xlsx — drag or click</div></div><div class="comp-summary" id="compSummary"></div><div class="card"><div class="card-header"><h3>Waterfall — Greeks change by sector</h3><div class="btn-group" id="compMetricBtns"><button class="btn btn-accent active" data-m="Delta" onclick="switchWF('Delta')">Delta</button><button class="btn" data-m="Gamma" onclick="switchWF('Gamma')">Gamma</button><button class="btn" data-m="Vega" onclick="switchWF('Vega')">Vega</button><button class="btn" data-m="Rho (10bp)" onclick="switchWF('Rho (10bp)')">Rho</button><button class="btn" data-m="Credit Spread" onclick="switchWF('Credit Spread')">Spread</button><button class="btn" data-m="Implied Vol." onclick="switchWF('Implied Vol.')">Impl. Vol.</button></div></div><div class="card-body"><div class="chart-wrap" style="height:360px"><canvas id="wfChart"></canvas></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Δ Weight by sector</h3></div><div class="card-body"><div class="chart-wrap" style="height:320px"><canvas id="wfWeightSec"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Δ Weight by region</h3></div><div class="card-body"><div class="chart-wrap" style="height:320px"><canvas id="wfWeightReg"></canvas></div></div></div></div><div class="card"><div class="card-header"><h3>Change details</h3><div class="btn-group"><button class="btn btn-accent" onclick="exportCompCSV()">⬇ CSV</button><button class="btn" onclick="copyCompCSV()">📋 Copy</button></div></div><div class="card-body scroll-x scroll-y-table" id="compTableWrap"></div></div></div>
   </div>
 </div>
 
@@ -216,13 +216,13 @@ var _libsLoaded={chart:false,xlsx:false};
 function _checkLibs(){
   var s=document.getElementById('loadStatus');
   if(_libsLoaded.chart && _libsLoaded.xlsx){
-    if(s) s.innerHTML='<span style="color:var(--green)">✓ Prêt</span>';
+    if(s) s.innerHTML='<span style="color:var(--green)">✓ Ready</span>';
     if(typeof libsReady!=='undefined') libsReady=true;
   } else {
     var parts=[];
     if(!_libsLoaded.chart) parts.push('Chart.js');
     if(!_libsLoaded.xlsx) parts.push('XLSX');
-    if(s) s.textContent='Chargement: '+parts.join(', ')+'...';
+    if(s) s.textContent='Loading: '+parts.join(', ')+'...';
   }
 }
 _checkLibs();
@@ -285,7 +285,7 @@ function parseFile(file,cb){
         for(var j=0;j<raw[i].length;j++){if(String(raw[i][j]).trim()==='MACE ID'){hi=i;break;}}
         if(hi>=0)break;
       }
-      if(hi===-1){cb(null,file.name,'En-tête MACE ID non trouvé');return;}
+      if(hi===-1){cb(null,file.name,'MACE ID header not found');return;}
       var headers=[];for(var j=0;j<raw[hi].length;j++){headers.push(raw[hi][j]!=null?String(raw[hi][j]).trim():'');}
       var data=[];
       for(var i=hi+1;i<raw.length;i++){
@@ -298,11 +298,11 @@ function parseFile(file,cb){
           data.push(obj);
         }
       }
-      if(data.length===0){cb(null,file.name,'Aucun instrument trouvé');return;}
+      if(data.length===0){cb(null,file.name,'No instruments found');return;}
       cb(data,file.name,null);
     }catch(err){cb(null,file.name,err.message);}
   };
-  reader.onerror=function(){cb(null,file.name,'Erreur lecture fichier');};
+  reader.onerror=function(){cb(null,file.name,'File read error');};
   reader.readAsArrayBuffer(file);
 }
 
@@ -313,9 +313,9 @@ function setupUpload(boxId,fileIdx){
   
   function handleFile(file){
     if(!file)return;
-    if(!libsReady){errEl.textContent='Librairies non chargées, patientez...';errEl.style.display='block';return;}
+    if(!libsReady){errEl.textContent='Libraries not loaded, please wait...';errEl.style.display='block';return;}
     statusEl.style.display='none';errEl.style.display='none';
-    statusEl.textContent='Chargement...';statusEl.style.display='block';
+    statusEl.textContent='Loading...';statusEl.style.display='block';
     parseFile(file,function(data,fname,error){
       if(error){errEl.textContent='\u2717 '+error;errEl.style.display='block';statusEl.style.display='none';box.classList.remove('loaded');return;}
       if(fileIdx===0){D1=data;F1=fname;}else{D2=data;F2=fname;}
@@ -349,7 +349,7 @@ function launchDashboard(){
   var panels=document.querySelectorAll('.panel');for(var i=0;i<panels.length;i++)panels[i].classList.remove('active');
   var ot=document.querySelector('.tab[data-tab="overview"]');if(ot)ot.classList.add('active');
   var op=document.getElementById('panel-overview');if(op)op.classList.add('active');
-  try{buildDashboard();}catch(err){alert('Erreur dashboard: '+err.message);console.error(err);}
+  try{buildDashboard();}catch(err){alert('Dashboard error: '+err.message);console.error(err);}
 }
 
 function renderKPIs(D){
@@ -360,7 +360,7 @@ function renderKPIs(D){
     if(y!=null&&y>0)ytmPos++;
     if(e!=null&&iw>0){edgeSv+=e*iw;edgeSw+=iw;}}
   var ytmMC=ytmSw>0?ytmSv/ytmSw:null,edgeW=edgeSw>0?edgeSv/edgeSw:null;
-  var kpis=[{l:'Instruments',v:n,c:'accent'},{l:'Delta pond.',v:F$(wAvg(D,'Delta'),2),c:'green'},{l:'Gamma pond.',v:F$(wAvg(D,'Gamma'),4),c:'orange'},{l:'Vega pond.',v:F$(wAvg(D,'Vega'),4),c:'cyan'},{l:'Rho (10bp)',v:F$(wAvg(D,'Rho (10bp)'),4),c:'pink'},{l:'Spread (bps)',v:F$(wAvg(D,'Credit Spread'),0),c:''},{l:'Duration',v:F$(wAvg(D,'Duration'),2),c:''},{l:'Vol Impl. pond.',v:volW!=null?volW.toFixed(1)+'%':'—',c:'accent'},{l:'Vol Impl. moy.',v:volA!=null?volA.toFixed(1)+'%':'—',c:''},{l:'YTM pond. (MV)',v:ytmMC!=null?ytmMC.toFixed(2)+'%':'—',c:'accent'},{l:'# YTM > 0',v:ytmPos,c:'green'},{l:'Edge to Theo. pond.',v:F$(edgeW,2),c:'orange'}];
+  var kpis=[{l:'Instruments',v:n,c:'accent'},{l:'Wtd. Delta',v:F$(wAvg(D,'Delta'),2),c:'green'},{l:'Wtd. Gamma',v:F$(wAvg(D,'Gamma'),4),c:'orange'},{l:'Wtd. Vega',v:F$(wAvg(D,'Vega'),4),c:'cyan'},{l:'Rho (10bp)',v:F$(wAvg(D,'Rho (10bp)'),4),c:'pink'},{l:'Spread (bps)',v:F$(wAvg(D,'Credit Spread'),0),c:''},{l:'Duration',v:F$(wAvg(D,'Duration'),2),c:''},{l:'Wtd. Impl. Vol.',v:volW!=null?volW.toFixed(1)+'%':'—',c:'accent'},{l:'Avg. Impl. Vol.',v:volA!=null?volA.toFixed(1)+'%':'—',c:''},{l:'Wtd. YTM (MV)',v:ytmMC!=null?ytmMC.toFixed(2)+'%':'—',c:'accent'},{l:'# YTM > 0',v:ytmPos,c:'green'},{l:'Wtd. Edge to Theo.',v:F$(edgeW,2),c:'orange'}];
   var kh='';for(var i=0;i<kpis.length;i++){var k=kpis[i];kh+='<div class="kpi"><div class="label">'+k.l+'</div><div class="value '+k.c+' mono">'+k.v+'</div></div>';}
   document.getElementById('kpiStrip').innerHTML=kh;
 }
@@ -389,25 +389,25 @@ function buildDashboard(){
   var mets=[{k:'w_Delta',l:'Delta',d:1},{k:'w_Gamma',l:'Gamma',d:3},{k:'w_Vega',l:'Vega',d:3},{k:'w_Rho (10bp)',l:'Rho',d:3},{k:'w_Credit Spread',l:'Spread',d:0},{k:'w_Implied Vol.',l:'Vol',d:1}];
   var rng={};for(var mi=0;mi<mets.length;mi++){var m=mets[mi];var mn=Infinity,mx=-Infinity;for(var si=0;si<gsecs.length;si++){var v=gsecs[si][m.k];if(v!=null){if(v<mn)mn=v;if(v>mx)mx=v;}}rng[m.k]={mn:mn,mx:mx};}
   var hc=function(v,mn,mx){if(v==null)return'var(--surface2)';var t=(v-mn)/(mx-mn||1);return'rgb('+(17+t*30|0)+','+(24+t*80|0)+','+(39+(1-t)*60|0)+')';};
-  var ht='<table class="heat-table"><thead><tr><th>Secteur</th><th>N</th><th>Poids</th>';for(var mi=0;mi<mets.length;mi++)ht+='<th>'+mets[mi].l+'</th>';ht+='</tr></thead><tbody>';
+  var ht='<table class="heat-table"><thead><tr><th>Sector</th><th>N</th><th>Weight</th>';for(var mi=0;mi<mets.length;mi++)ht+='<th>'+mets[mi].l+'</th>';ht+='</tr></thead><tbody>';
   for(var si=0;si<gsecs.length;si++){var s=gsecs[si];ht+='<tr><td class="label-cell">'+s.name+'</td><td>'+s.count+'</td><td class="mono">'+s.weight.toFixed(2)+'</td>';for(var mi=0;mi<mets.length;mi++){var m=mets[mi];var v=s[m.k];ht+='<td style="background:'+hc(v,rng[m.k].mn,rng[m.k].mx)+';color:var(--text)" class="mono">'+F$(v,m.d)+'</td>';}ht+='</tr>';}
   ht+='<tr style="font-weight:700"><td class="label-cell" style="font-weight:700">Total</td><td>'+D.length+'</td><td class="mono">100.00</td>';for(var mi=0;mi<mets.length;mi++){var m=mets[mi];var f=m.k.replace('w_','');ht+='<td class="mono" style="background:var(--surface2);color:var(--accent);font-weight:700">'+F$(wAvg(D,f),m.d)+'</td>';}ht+='</tr></tbody></table>';
   document.getElementById('greeksHeatmap').innerHTML=ht;
   
   var gsl=gsecs.map(function(s){return s.name});
-  new Chart(document.getElementById('deltaWeightChart'),{type:'bar',data:{labels:gsl,datasets:[{label:'Poids %',data:gsecs.map(function(s){return+s.weight.toFixed(3)}),backgroundColor:'rgba(96,165,250,0.5)',borderColor:'#60a5fa',borderWidth:1,yAxisID:'y',order:2},{label:'Delta',data:gsecs.map(function(s){return s.w_Delta?+s.w_Delta.toFixed(2):0}),type:'line',borderColor:'#34d399',backgroundColor:'rgba(52,211,153,0.15)',pointBackgroundColor:'#34d399',pointRadius:4,tension:0.3,yAxisID:'y1',order:1}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{x:{ticks:{maxRotation:45,font:{size:9}}},y:{position:'left',title:{display:true,text:'Poids'}},y1:{position:'right',title:{display:true,text:'Delta'},grid:{drawOnChartArea:false}}},plugins:{legend:{position:'bottom'}}}});
+  new Chart(document.getElementById('deltaWeightChart'),{type:'bar',data:{labels:gsl,datasets:[{label:'Weight %',data:gsecs.map(function(s){return+s.weight.toFixed(3)}),backgroundColor:'rgba(96,165,250,0.5)',borderColor:'#60a5fa',borderWidth:1,yAxisID:'y',order:2},{label:'Delta',data:gsecs.map(function(s){return s.w_Delta?+s.w_Delta.toFixed(2):0}),type:'line',borderColor:'#34d399',backgroundColor:'rgba(52,211,153,0.15)',pointBackgroundColor:'#34d399',pointRadius:4,tension:0.3,yAxisID:'y1',order:1}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{x:{ticks:{maxRotation:45,font:{size:9}}},y:{position:'left',title:{display:true,text:'Weight'}},y1:{position:'right',title:{display:true,text:'Delta'},grid:{drawOnChartArea:false}}},plugins:{legend:{position:'bottom'}}}});
   new Chart(document.getElementById('gammaChart'),{type:'bar',data:{labels:gsl,datasets:[{data:gsecs.map(function(s){return s.w_Gamma?+s.w_Gamma.toFixed(4):0}),backgroundColor:CL.map(function(c){return c+'99'}),borderColor:CL,borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{maxRotation:45,font:{size:9}}}},plugins:{legend:{display:false}}}});
   new Chart(document.getElementById('vegaChart'),{type:'bar',data:{labels:gsl,datasets:[{data:gsecs.map(function(s){return s.w_Vega?+s.w_Vega.toFixed(4):0}),backgroundColor:CL.map(function(c){return c+'99'}),borderColor:CL,borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{maxRotation:45,font:{size:9}}}},plugins:{legend:{display:false}}}});
   new Chart(document.getElementById('rhoChart'),{type:'bar',data:{labels:gsl,datasets:[{data:gsecs.map(function(s){return s['w_Rho (10bp)']?+s['w_Rho (10bp)'].toFixed(4):0}),backgroundColor:gsecs.map(function(s){return(s['w_Rho (10bp)']||0)<0?'rgba(248,113,113,0.6)':'rgba(52,211,153,0.6)'}),borderColor:gsecs.map(function(s){return(s['w_Rho (10bp)']||0)<0?'#f87171':'#34d399'}),borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{maxRotation:45,font:{size:9}}}},plugins:{legend:{display:false}}}});
   
   var ctrs=grp(D,'Country',['Delta','Gamma','Vega','Rho (10bp)','Credit Spread']);
   var cm=[{k:'w_Delta',l:'Delta',d:1},{k:'w_Gamma',l:'Gamma',d:3},{k:'w_Vega',l:'Vega',d:3},{k:'w_Rho (10bp)',l:'Rho',d:3},{k:'w_Credit Spread',l:'Spread',d:0}];
-  var ct='<table class="heat-table"><thead><tr><th>Pays</th><th>N</th><th>Poids</th>';for(var mi=0;mi<cm.length;mi++)ct+='<th>'+cm[mi].l+'</th>';ct+='</tr></thead><tbody>';
+  var ct='<table class="heat-table"><thead><tr><th>Country</th><th>N</th><th>Weight</th>';for(var mi=0;mi<cm.length;mi++)ct+='<th>'+cm[mi].l+'</th>';ct+='</tr></thead><tbody>';
   for(var ci=0;ci<ctrs.length;ci++){var c=ctrs[ci];ct+='<tr><td class="label-cell">'+c.name+'</td><td>'+c.count+'</td><td class="mono">'+c.weight.toFixed(2)+'</td>';for(var mi=0;mi<cm.length;mi++)ct+='<td class="mono">'+F$(c[cm[mi].k],cm[mi].d)+'</td>';ct+='</tr>';}ct+='</tbody></table>';
   document.getElementById('countryHeatmap').innerHTML=ct;
   
   var regs=grp(D,'Region',['Delta','Credit Spread','Edge to Theo.']);
-  new Chart(document.getElementById('regionDeltaChart'),{type:'bar',data:{labels:regs.map(function(r){return r.name}),datasets:[{label:'Poids',data:regs.map(function(r){return+r.weight.toFixed(2)}),backgroundColor:'rgba(96,165,250,0.5)',borderColor:'#60a5fa',borderWidth:1},{label:'Delta',data:regs.map(function(r){return r.w_Delta?+r.w_Delta.toFixed(2):0}),backgroundColor:'rgba(52,211,153,0.5)',borderColor:'#34d399',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+  new Chart(document.getElementById('regionDeltaChart'),{type:'bar',data:{labels:regs.map(function(r){return r.name}),datasets:[{label:'Weight',data:regs.map(function(r){return+r.weight.toFixed(2)}),backgroundColor:'rgba(96,165,250,0.5)',borderColor:'#60a5fa',borderWidth:1},{label:'Delta',data:regs.map(function(r){return r.w_Delta?+r.w_Delta.toFixed(2):0}),backgroundColor:'rgba(52,211,153,0.5)',borderColor:'#34d399',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
   new Chart(document.getElementById('regionSpreadChart'),{type:'bar',data:{labels:regs.map(function(r){return r.name}),datasets:[{data:regs.map(function(r){return r['w_Credit Spread']?+r['w_Credit Spread'].toFixed(0):0}),backgroundColor:CL.slice(4).map(function(c){return c+'99'}),borderColor:CL.slice(4),borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
   new Chart(document.getElementById('regionEdgeChart'),{type:'bar',data:{labels:regs.map(function(r){return r.name}),datasets:[{data:regs.map(function(r){return r['w_Edge to Theo.']!=null?+r['w_Edge to Theo.'].toFixed(2):0}),backgroundColor:regs.map(function(r){return(r['w_Edge to Theo.']||0)<0?'rgba(248,113,113,0.6)':'rgba(52,211,153,0.6)'}),borderColor:regs.map(function(r){return(r['w_Edge to Theo.']||0)<0?'#f87171':'#34d399'}),borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{title:{display:true,text:'Edge to Theo.'}}},plugins:{legend:{display:false}}}});
   
@@ -485,7 +485,7 @@ function setupScatterDualRange(prefix,minV,maxV,step,fmt){
   setVisual(minV,maxV);
 }
 function buildScatterChips(containerId,values){
-  var h='<button class="sf-chip sf-chip-all active" data-v="__ALL__">Tous</button>';
+  var h='<button class="sf-chip sf-chip-all active" data-v="__ALL__">All</button>';
   for(var i=0;i<values.length;i++)h+='<button class="sf-chip active" data-v="'+values[i]+'">'+values[i]+'</button>';
   var box=document.getElementById(containerId);box.innerHTML=h;
   var btns=box.querySelectorAll('.sf-chip');
@@ -575,8 +575,8 @@ function buildScatter(){
   new Chart(c,{type:'bubble',data:{datasets:sds},options:{responsive:true,maintainAspectRatio:false,
     onHover:function(evt,els){if(evt&&evt.native&&evt.native.target)evt.native.target.style.cursor=els.length?'pointer':'default';},
     onClick:function(evt,els,chart){if(!els.length)return;var el=els[0];var pt=chart.data.datasets[el.datasetIndex].data[el.index];if(pt&&pt._ref)window.open(cbPricerURL(pt._ref),'_blank','noopener');},
-    scales:{x:{title:{display:true,text:'Delta'},min:0,max:100},y:{title:{display:true,text:'Prime (%)'},min:-30,max:200}},
-    plugins:{legend:{position:'bottom',labels:{font:{size:9}}},tooltip:{callbacks:{label:function(ctx){var p=ctx.raw;return p.label+' • '+p.sector+' / '+p.region+' ('+p.ccy+') • Δ='+(+p.x).toFixed(1)+' • Prime='+(+p.y).toFixed(1)+'%  (click → pricer)';}}}}}});
+    scales:{x:{title:{display:true,text:'Delta'},min:0,max:100},y:{title:{display:true,text:'Premium (%)'},min:-30,max:200}},
+    plugins:{legend:{position:'bottom',labels:{font:{size:9}}},tooltip:{callbacks:{label:function(ctx){var p=ctx.raw;return p.label+' • '+p.sector+' / '+p.region+' ('+p.ccy+') • Δ='+(+p.x).toFixed(1)+' • Premium='+(+p.y).toFixed(1)+'%  (click → pricer)';}}}}}});
 }
 var sortCol='Index Weight',sortAsc=false;
 function getFiltered(){
@@ -598,7 +598,7 @@ function renderTable(){
   var fmt=function(x){return x>=1000?(x/1000).toFixed(2)+' USDbn':x.toFixed(0)+' USDm';};
   document.getElementById('sizeTag').textContent='Taille: '+fmt(mvF)+(mvF<mvT?' / '+fmt(mvT):'');
   var ths=document.querySelectorAll('#mainTable th');for(var i=0;i<ths.length;i++){ths[i].classList.remove('sorted-asc','sorted-desc');if(ths[i].getAttribute('data-sort')===sortCol)ths[i].classList.add(sortAsc?'sorted-asc':'sorted-desc');}
-  var h='';for(var i=0;i<f.length;i++){var d=f[i];h+='<tr><td class="name-cell">'+d._dn+'</td><td>'+(d.Sector||'\u2014')+'</td><td>'+(d.Country||'\u2014')+'</td><td>'+(d['Bond Currency']||'\u2014')+'</td><td>'+F$(V(d['Convertible Price']),2)+'</td><td>'+F$(V(d['Index Weight']),3)+'</td><td>'+F$(V(d['Market Cap (USDm)']),0)+'</td><td>'+F$(V(d.Delta),1)+'</td><td>'+F$(V(d.Gamma),3)+'</td><td>'+F$(V(d.Vega),3)+'</td><td class="'+((V(d['Rho (10bp)'])||0)<0?'num-neg':'num-pos')+'">'+F$(V(d['Rho (10bp)']),3)+'</td><td>'+F$(V(d['Credit Spread']),0)+'</td><td>'+F$(V(d['Implied Vol.']),1)+'</td><td>'+F$(V(d['Input Vol.']),1)+'</td><td>'+F$(V(d['Conversion Premium']),1)+'</td><td>'+F$(V(d.Parity),1)+'</td><td>'+F$(V(d.Duration),2)+'</td><td><a class="pricer-link" target="_blank" rel="noopener" href="'+cbPricerURL(d)+'" title="Pricer cette CB">↗</a></td></tr>';}
+  var h='';for(var i=0;i<f.length;i++){var d=f[i];h+='<tr><td class="name-cell">'+d._dn+'</td><td>'+(d.Sector||'\u2014')+'</td><td>'+(d.Country||'\u2014')+'</td><td>'+(d['Bond Currency']||'\u2014')+'</td><td>'+F$(V(d['Convertible Price']),2)+'</td><td>'+F$(V(d['Index Weight']),3)+'</td><td>'+F$(V(d['Market Cap (USDm)']),0)+'</td><td>'+F$(V(d.Delta),1)+'</td><td>'+F$(V(d.Gamma),3)+'</td><td>'+F$(V(d.Vega),3)+'</td><td class="'+((V(d['Rho (10bp)'])||0)<0?'num-neg':'num-pos')+'">'+F$(V(d['Rho (10bp)']),3)+'</td><td>'+F$(V(d['Credit Spread']),0)+'</td><td>'+F$(V(d['Implied Vol.']),1)+'</td><td>'+F$(V(d['Input Vol.']),1)+'</td><td>'+F$(V(d['Conversion Premium']),1)+'</td><td>'+F$(V(d.Parity),1)+'</td><td>'+F$(V(d.Duration),2)+'</td><td><a class="pricer-link" target="_blank" rel="noopener" href="'+cbPricerURL(d)+'" title="Price this CB">↗</a></td></tr>';}
   document.getElementById('tableBody').innerHTML=h;
 }
 function initTable(D){
@@ -614,15 +614,15 @@ function initTable(D){
 }
 
 function dl(uri,fn){var a=document.createElement('a');a.href=uri;a.download=fn;a.target='_blank';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a)},500);}
-function cp(txt,lbl){try{navigator.clipboard.writeText(txt).then(function(){alert(lbl+' copié !')});}catch(e){var t=document.createElement('textarea');t.value=txt;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert(lbl+' copié !');}}
-function buildCSV(filtered){var h='Instrument\tISIN\tSecteur\tPays\tRégion\tDevise\tPrix CB\tCoupon\tMaturité\tPoids %\tMV (USDm)\tDelta\tGamma\tVega\tRho\tSpread\tVol Impl.\tVol Input\tPrime %\tParité\tDuration\n';var ff=['_dn','ISIN','Sector','Country','Region','Bond Currency','Convertible Price','Coupon','Maturity','Index Weight','Market Cap (USDm)','Delta','Gamma','Vega','Rho (10bp)','Credit Spread','Implied Vol.','Input Vol.','Conversion Premium','Parity','Duration'];for(var i=0;i<filtered.length;i++){var d=filtered[i];var row=[];for(var j=0;j<ff.length;j++){var v=d[ff[j]];row.push(v==null?'':String(v));}h+=row.join('\t')+'\n';}return h;}
+function cp(txt,lbl){try{navigator.clipboard.writeText(txt).then(function(){alert(lbl+' copied!')});}catch(e){var t=document.createElement('textarea');t.value=txt;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert(lbl+' copied!');}}
+function buildCSV(filtered){var h='Instrument\tISIN\tSector\tCountry\tRegion\tCurrency\tCB Price\tCoupon\tMaturity\tWeight %\tMV (USDm)\tDelta\tGamma\tVega\tRho\tSpread\tImpl. Vol.\tInput Vol.\tPremium %\tParity\tDuration\n';var ff=['_dn','ISIN','Sector','Country','Region','Bond Currency','Convertible Price','Coupon','Maturity','Index Weight','Market Cap (USDm)','Delta','Gamma','Vega','Rho (10bp)','Credit Spread','Implied Vol.','Input Vol.','Conversion Premium','Parity','Duration'];for(var i=0;i<filtered.length;i++){var d=filtered[i];var row=[];for(var j=0;j<ff.length;j++){var v=d[ff[j]];row.push(v==null?'':String(v));}h+=row.join('\t')+'\n';}return h;}
 function exportCSV(){var f=getFiltered();var csv='\uFEFF'+buildCSV(f).replace(/\t/g,';');dl('data:text/csv;charset=utf-8,'+encodeURIComponent(csv),'FTSE_CB_Export.csv');}
-function exportXLSX(){if(typeof XLSX==='undefined')return;var f=getFiltered();var h=['Instrument','ISIN','Secteur','Pays','Region','Devise','Prix CB','Coupon','Maturite','Poids','MV USDm','Delta','Gamma','Vega','Rho','Spread','Vol Impl','Vol Input','Prime','Parite','Duration'];var ff=['_dn','ISIN','Sector','Country','Region','Bond Currency','Convertible Price','Coupon','Maturity','Index Weight','Market Cap (USDm)','Delta','Gamma','Vega','Rho (10bp)','Credit Spread','Implied Vol.','Input Vol.','Conversion Premium','Parity','Duration'];var rows=[h];for(var i=0;i<f.length;i++){var d=f[i];var r=[];for(var j=0;j<ff.length;j++)r.push(d[ff[j]]!=null?d[ff[j]]:'');rows.push(r);}var ws=XLSX.utils.aoa_to_sheet(rows);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Data');var b64=XLSX.write(wb,{bookType:'xlsx',type:'base64'});dl('data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+b64,'FTSE_CB.xlsx');}
-function copyCSV(){cp(buildCSV(getFiltered()),'Données');}
+function exportXLSX(){if(typeof XLSX==='undefined')return;var f=getFiltered();var h=['Instrument','ISIN','Sector','Country','Region','Currency','CB Price','Coupon','Maturity','Weight','MV USDm','Delta','Gamma','Vega','Rho','Spread','Impl Vol','Input Vol','Premium','Parity','Duration'];var ff=['_dn','ISIN','Sector','Country','Region','Bond Currency','Convertible Price','Coupon','Maturity','Index Weight','Market Cap (USDm)','Delta','Gamma','Vega','Rho (10bp)','Credit Spread','Implied Vol.','Input Vol.','Conversion Premium','Parity','Duration'];var rows=[h];for(var i=0;i<f.length;i++){var d=f[i];var r=[];for(var j=0;j<ff.length;j++)r.push(d[ff[j]]!=null?d[ff[j]]:'');rows.push(r);}var ws=XLSX.utils.aoa_to_sheet(rows);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Data');var b64=XLSX.write(wb,{bookType:'xlsx',type:'base64'});dl('data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+b64,'FTSE_CB.xlsx');}
+function copyCSV(){cp(buildCSV(getFiltered()),'Data');}
 
 var wfC=null;
 function buildComparison(){
-  var ms=[{l:'Instruments',fn:function(d){return d.length},d:0},{l:'Delta',fn:function(d){return wAvg(d,'Delta')},d:2},{l:'Gamma',fn:function(d){return wAvg(d,'Gamma')},d:4},{l:'Vega',fn:function(d){return wAvg(d,'Vega')},d:4},{l:'Rho',fn:function(d){return wAvg(d,'Rho (10bp)')},d:4},{l:'Spread',fn:function(d){return wAvg(d,'Credit Spread')},d:0},{l:'Vol Impl.',fn:function(d){return wAvg(d,'Implied Vol.')},d:1}];
+  var ms=[{l:'Instruments',fn:function(d){return d.length},d:0},{l:'Delta',fn:function(d){return wAvg(d,'Delta')},d:2},{l:'Gamma',fn:function(d){return wAvg(d,'Gamma')},d:4},{l:'Vega',fn:function(d){return wAvg(d,'Vega')},d:4},{l:'Rho',fn:function(d){return wAvg(d,'Rho (10bp)')},d:4},{l:'Spread',fn:function(d){return wAvg(d,'Credit Spread')},d:0},{l:'Impl. Vol.',fn:function(d){return wAvg(d,'Implied Vol.')},d:1}];
   var sh='';for(var i=0;i<ms.length;i++){var m=ms[i];var v1=m.fn(D1),v2=m.fn(D2);var diff=(v1!=null&&v2!=null)?v1-v2:null;var cls=diff==null?'chg-flat':diff>0.0001?'chg-up':diff<-0.0001?'chg-down':'chg-flat';var sign=diff>0?'+':'';sh+='<div class="comp-card"><div class="comp-label">'+m.l+'</div><div class="comp-values"><span class="comp-old">'+F$(v2,m.d)+'</span><span class="comp-arrow">\u2192</span><span class="comp-new">'+F$(v1,m.d)+'</span></div><div class="comp-chg '+cls+'">'+(diff!=null?sign+F$(diff,m.d):'\u2014')+'</div></div>';}
   document.getElementById('compSummary').innerHTML=sh;
   renderWF('Delta');renderBarD('wfWeightSec',D1,D2,'Sector');renderBarD('wfWeightReg',D1,D2,'Region');renderCompTable();
@@ -648,28 +648,28 @@ function renderBarD(canvasId,data1,data2,key){
   var m1={},m2={};for(var i=0;i<g1.length;i++)m1[g1[i].name]=g1[i].weight;for(var i=0;i<g2.length;i++)m2[g2[i].name]=g2[i].weight;
   var changes=[];for(var i=0;i<all.length;i++){var c=(m1[all[i]]||0)-(m2[all[i]]||0);if(Math.abs(c)>0.005)changes.push({name:all[i],change:c});}
   changes.sort(function(a,b){return b.change-a.change});
-  new Chart(document.getElementById(canvasId),{type:'bar',data:{labels:changes.map(function(c){return c.name}),datasets:[{data:changes.map(function(c){return+c.change.toFixed(3)}),backgroundColor:changes.map(function(c){return c.change>=0?'rgba(52,211,153,0.7)':'rgba(248,113,113,0.7)'}),borderColor:changes.map(function(c){return c.change>=0?'#34d399':'#f87171'}),borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{title:{display:true,text:'\u0394 Poids (%)'}}},plugins:{legend:{display:false}}}});
+  new Chart(document.getElementById(canvasId),{type:'bar',data:{labels:changes.map(function(c){return c.name}),datasets:[{data:changes.map(function(c){return+c.change.toFixed(3)}),backgroundColor:changes.map(function(c){return c.change>=0?'rgba(52,211,153,0.7)':'rgba(248,113,113,0.7)'}),borderColor:changes.map(function(c){return c.change>=0?'#34d399':'#f87171'}),borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{title:{display:true,text:'\u0394 Weight (%)'}}},plugins:{legend:{display:false}}}});
 }
 function renderCompTable(){
   var m1=new Map();for(var i=0;i<D1.length;i++)m1.set(D1[i].ISIN,D1[i]);
   var m2=new Map();for(var i=0;i<D2.length;i++)m2.set(D2[i].ISIN,D2[i]);
   var allKeys=new Set();m1.forEach(function(v,k){allKeys.add(k)});m2.forEach(function(v,k){allKeys.add(k)});
   var rows=[];allKeys.forEach(function(isin){
-    var a=m1.get(isin),b=m2.get(isin);var status=a&&b?'Commun':a?'\ud83c\udd95 Entré':'\ud83d\udd34 Sorti';var cur=a||b;
+    var a=m1.get(isin),b=m2.get(isin);var status=a&&b?'Common':a?'\ud83c\udd95 Entered':'\ud83d\udd34 Exited';var cur=a||b;
     var dd=(a&&b)?(V(a.Delta)||0)-(V(b.Delta)||0):null;var dw=(a&&b)?(V(a['Index Weight'])||0)-(V(b['Index Weight'])||0):null;
     var dg=(a&&b)?(V(a.Gamma)||0)-(V(b.Gamma)||0):null;var dv=(a&&b)?(V(a.Vega)||0)-(V(b.Vega)||0):null;
     var ds=(a&&b)?(V(a['Credit Spread'])||0)-(V(b['Credit Spread'])||0):null;var dp=(a&&b)?(V(a['Convertible Price'])||0)-(V(b['Convertible Price'])||0):null;
     rows.push({isin:isin,name:(a||b)._dn,sector:cur.Sector,status:status,w1:a?V(a['Index Weight']):null,w2:b?V(b['Index Weight']):null,p1:a?V(a['Convertible Price']):null,p2:b?V(b['Convertible Price']):null,dw:dw,dd:dd,dg:dg,dv:dv,ds:ds,dp:dp});
   });
-  rows.sort(function(a,b){if(a.status!==b.status){var o={'\ud83c\udd95 Entré':0,'\ud83d\udd34 Sorti':1,'Commun':2};return(o[a.status]||3)-(o[b.status]||3);}return Math.abs(b.dw||0)-Math.abs(a.dw||0);});
+  rows.sort(function(a,b){if(a.status!==b.status){var o={'\ud83c\udd95 Entered':0,'\ud83d\udd34 Exited':1,'Common':2};return(o[a.status]||3)-(o[b.status]||3);}return Math.abs(b.dw||0)-Math.abs(a.dw||0);});
   var cc=function(v){return v==null?'':v>0.001?'chg-up':v<-0.001?'chg-down':'chg-flat';};
   var cf=function(v,d){return v==null?'\u2014':(v>=0?'+':'')+v.toFixed(d);};
-  var h='<table class="data-table"><thead><tr><th>Instrument</th><th>Secteur</th><th>Statut</th><th>Prix D2</th><th>Prix D1</th><th>\u0394 Prix</th><th>Poids D2</th><th>Poids D1</th><th>\u0394 Poids</th><th>\u0394 Delta</th><th>\u0394 Gamma</th><th>\u0394 Vega</th><th>\u0394 Spread</th></tr></thead><tbody>';
+  var h='<table class="data-table"><thead><tr><th>Instrument</th><th>Sector</th><th>Status</th><th>Price D2</th><th>Price D1</th><th>\u0394 Price</th><th>Weight D2</th><th>Weight D1</th><th>\u0394 Weight</th><th>\u0394 Delta</th><th>\u0394 Gamma</th><th>\u0394 Vega</th><th>\u0394 Spread</th></tr></thead><tbody>';
   for(var i=0;i<rows.length;i++){var r=rows[i];h+='<tr><td class="name-cell">'+r.name+'</td><td>'+(r.sector||'\u2014')+'</td><td>'+r.status+'</td><td>'+F$(r.p2,2)+'</td><td>'+F$(r.p1,2)+'</td><td class="'+cc(r.dp)+'">'+cf(r.dp,2)+'</td><td>'+F$(r.w2,3)+'</td><td>'+F$(r.w1,3)+'</td><td class="'+cc(r.dw)+'">'+cf(r.dw,3)+'</td><td class="'+cc(r.dd)+'">'+cf(r.dd,1)+'</td><td class="'+cc(r.dg)+'">'+cf(r.dg,3)+'</td><td class="'+cc(r.dv)+'">'+cf(r.dv,3)+'</td><td class="'+cc(r.ds)+'">'+cf(r.ds,0)+'</td></tr>';}
   h+='</tbody></table>';document.getElementById('compTableWrap').innerHTML=h;window._compRows=rows;
 }
-function exportCompCSV(){if(!window._compRows)return;var r=window._compRows;var c='\uFEFF'+'Instrument;Secteur;Statut;Prix D2;Prix D1;D Prix;Poids D2;Poids D1;D Poids;D Delta;D Gamma;D Vega;D Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.ds!=null?x.ds.toFixed(0):''].join(';')+'\n';}dl('data:text/csv;charset=utf-8,'+encodeURIComponent(c),'FTSE_Comparison.csv');}
-function copyCompCSV(){if(!window._compRows)return;var r=window._compRows;var c='Instrument\tSecteur\tStatut\tPrix D2\tPrix D1\tD Prix\tPoids D2\tPoids D1\tD Poids\tD Delta\tD Gamma\tD Vega\tD Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.ds!=null?x.ds.toFixed(0):''].join('\t')+'\n';}cp(c,'Comparaison');}
+function exportCompCSV(){if(!window._compRows)return;var r=window._compRows;var c='\uFEFF'+'Instrument;Sector;Status;Price D2;Price D1;D Price;Weight D2;Weight D1;D Weight;D Delta;D Gamma;D Vega;D Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.ds!=null?x.ds.toFixed(0):''].join(';')+'\n';}dl('data:text/csv;charset=utf-8,'+encodeURIComponent(c),'FTSE_Comparison.csv');}
+function copyCompCSV(){if(!window._compRows)return;var r=window._compRows;var c='Instrument\tSector\tStatus\tPrice D2\tPrice D1\tD Price\tWeight D2\tWeight D1\tD Weight\tD Delta\tD Gamma\tD Vega\tD Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.ds!=null?x.ds.toFixed(0):''].join('\t')+'\n';}cp(c,'Comparison');}
 
 
 
@@ -693,7 +693,7 @@ function resetDashboard(){
   // Enable launch button since D1 still exists
   var lb=document.getElementById('launchBtn'); if(lb) lb.classList.toggle('ready',D1!=null);
   // Update load status
-  var ls=document.getElementById('loadStatus'); if(ls) ls.innerHTML='<span style="color:var(--green)">✓ Prêt</span>';
+  var ls=document.getElementById('loadStatus'); if(ls) ls.innerHTML='<span style="color:var(--green)">✓ Ready</span>';
 }
 
 // AUTO-INIT with embedded data
@@ -724,14 +724,14 @@ document.addEventListener('DOMContentLoaded', function(){
       inp.onchange = function(){
         if(!inp.files[0]) return;
         parseFile(inp.files[0], function(arr, name, err){
-          if(err){ alert('Erreur: ' + err); return; }
+          if(err){ alert('Error: ' + err); return; }
           D2 = arr; F2 = name;
           var chip2 = document.getElementById('chip2');
           if(chip2) chip2.style.display = '';
           var chipLabel2 = document.getElementById('chipLabel2');
           if(chipLabel2) chipLabel2.textContent = name + ' (' + arr.length + ')';
           compUploadArea.innerHTML = '<div style="color:#34d399;font-weight:600">\u2713 ' + name + ' (' + arr.length + ' inst.)</div>';
-          try { buildComparison(); } catch(e) { console.error(e); alert('Erreur comparaison: ' + e.message); }
+          try { buildComparison(); } catch(e) { console.error(e); alert('Comparison error: ' + e.message); }
         });
       };
       inp.click();
@@ -743,14 +743,14 @@ document.addEventListener('DOMContentLoaded', function(){
       if(e.dataTransfer && e.dataTransfer.files[0]){
         var file = e.dataTransfer.files[0];
         parseFile(file, function(arr, name, err){
-          if(err){ alert('Erreur: ' + err); return; }
+          if(err){ alert('Error: ' + err); return; }
           D2 = arr; F2 = name;
           var chip2 = document.getElementById('chip2');
           if(chip2) chip2.style.display = '';
           var chipLabel2 = document.getElementById('chipLabel2');
           if(chipLabel2) chipLabel2.textContent = name + ' (' + arr.length + ')';
           compUploadArea.innerHTML = '<div style="color:#34d399;font-weight:600">\u2713 ' + name + ' (' + arr.length + ' inst.)</div>';
-          try { buildComparison(); } catch(e2) { console.error(e2); alert('Erreur comparaison: ' + e2.message); }
+          try { buildComparison(); } catch(e2) { console.error(e2); alert('Comparison error: ' + e2.message); }
         });
       }
     });
