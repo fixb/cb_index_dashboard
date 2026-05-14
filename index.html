@@ -606,11 +606,15 @@ function initTable(D){
   var sSet={},rSet={},cSet={};for(var i=0;i<D.length;i++){if(D[i].Sector)sSet[D[i].Sector]=1;if(D[i].Region)rSet[D[i].Region]=1;if(D[i]['Bond Currency'])cSet[D[i]['Bond Currency']]=1;}
   var secs=Object.keys(sSet).sort(),regs=Object.keys(rSet).sort(),ccys=Object.keys(cSet).sort();
   var fS=document.getElementById('filterSector'),fR=document.getElementById('filterRegion'),fC=document.getElementById('filterCcy');
+  fS.innerHTML='<option value="">All sectors</option>';fR.innerHTML='<option value="">All regions</option>';fC.innerHTML='<option value="">All currencies</option>';
   for(var i=0;i<secs.length;i++)fS.innerHTML+='<option value="'+secs[i]+'">'+secs[i]+'</option>';
   for(var i=0;i<regs.length;i++)fR.innerHTML+='<option value="'+regs[i]+'">'+regs[i]+'</option>';
   for(var i=0;i<ccys.length;i++)fC.innerHTML+='<option value="'+ccys[i]+'">'+ccys[i]+'</option>';
-  document.getElementById('searchInput').addEventListener('input',renderTable);fS.addEventListener('change',renderTable);fR.addEventListener('change',renderTable);fC.addEventListener('change',renderTable);
-  var ths=document.querySelectorAll('#mainTable th[data-sort]');for(var i=0;i<ths.length;i++){ths[i].addEventListener('click',function(){var c=this.getAttribute('data-sort');if(sortCol===c)sortAsc=!sortAsc;else{sortCol=c;sortAsc=false;}renderTable();});}
+  if(!initTable._wired){
+    document.getElementById('searchInput').addEventListener('input',renderTable);fS.addEventListener('change',renderTable);fR.addEventListener('change',renderTable);fC.addEventListener('change',renderTable);
+    var ths=document.querySelectorAll('#mainTable th[data-sort]');for(var i=0;i<ths.length;i++){ths[i].addEventListener('click',function(){var c=this.getAttribute('data-sort');if(sortCol===c)sortAsc=!sortAsc;else{sortCol=c;sortAsc=false;}renderTable();});}
+    initTable._wired=true;
+  }
   renderTable();
 }
 
