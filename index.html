@@ -349,7 +349,7 @@ function setupUpload(boxId,fileIdx){
 
 function launchDashboard(){
   if(!D1)return;
-  for(var i=0;i<D1.length;i++){D1[i]._dn=dn(D1[i]);var _dv=D1[i].Duration;if(typeof _dv==='number'&&_dv>30)D1[i].Duration=30;}
+  for(var i=0;i<D1.length;i++){D1[i]._dn=dn(D1[i]);var _dv=V(D1[i].Duration);if(_dv!=null&&_dv>30)D1[i].Duration=30;}
   document.getElementById('landing').style.display='none';
   document.getElementById('dashboard').style.display='block';
   document.getElementById('chipLabel1').textContent=F1+' ('+D1.length+')';
@@ -718,7 +718,7 @@ document.addEventListener('DOMContentLoaded', function(){
   setupUpload('box2',1);
   
   // Assign display names
-  for(var i=0;i<D1.length;i++){D1[i]._dn=dn(D1[i]);var _dv=D1[i].Duration;if(typeof _dv==='number'&&_dv>30)D1[i].Duration=30;}
+  for(var i=0;i<D1.length;i++){D1[i]._dn=dn(D1[i]);var _dv=V(D1[i].Duration);if(_dv!=null&&_dv>30)D1[i].Duration=30;}
   
   // Hide landing, show dashboard
   var landing = document.getElementById('landing');
