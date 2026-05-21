@@ -193,6 +193,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <div class="sf-rng"><div class="sf-head"><span class="sf-label">CB Price</span><span class="sf-val-pair"><input type="number" class="sf-num" id="sfPriceMinNum"><span>—</span><input type="number" class="sf-num" id="sfPriceMaxNum"></span></div><div class="sf-dual"><div class="sf-track"></div><div class="sf-fill" id="sfPriceFill"></div><input type="range" id="sfPriceMin"><input type="range" id="sfPriceMax"></div></div>
           <div class="sf-rng"><div class="sf-head"><span class="sf-label">Maturity year</span><span class="sf-val-pair"><input type="number" class="sf-num" id="sfMatMinNum"><span>—</span><input type="number" class="sf-num" id="sfMatMaxNum"></span></div><div class="sf-dual"><div class="sf-track"></div><div class="sf-fill" id="sfMatFill"></div><input type="range" id="sfMatMin"><input type="range" id="sfMatMax"></div></div>
           <div class="sf-rng"><div class="sf-head"><span class="sf-label">Issue year</span><span class="sf-val-pair"><input type="number" class="sf-num" id="sfIssMinNum"><span>—</span><input type="number" class="sf-num" id="sfIssMaxNum"></span></div><div class="sf-dual"><div class="sf-track"></div><div class="sf-fill" id="sfIssFill"></div><input type="range" id="sfIssMin"><input type="range" id="sfIssMax"></div></div>
+          <div class="sf-rng"><div class="sf-head"><span class="sf-label">Parity</span><span class="sf-val-pair"><input type="number" class="sf-num" id="sfParMinNum"><span>—</span><input type="number" class="sf-num" id="sfParMaxNum"></span></div><div class="sf-dual"><div class="sf-track"></div><div class="sf-fill" id="sfParFill"></div><input type="range" id="sfParMin"><input type="range" id="sfParMax"></div></div>
+          <div class="sf-rng"><div class="sf-head"><span class="sf-label">Conv. Premium (%)</span><span class="sf-val-pair"><input type="number" class="sf-num" id="sfPremMinNum"><span>—</span><input type="number" class="sf-num" id="sfPremMaxNum"></span></div><div class="sf-dual"><div class="sf-track"></div><div class="sf-fill" id="sfPremFill"></div><input type="range" id="sfPremMin"><input type="range" id="sfPremMax"></div></div>
           <div class="sf-rng sf-cell-wide"><div class="sf-head"><span class="sf-label">Sectors</span></div><div class="sf-chips" id="sfSectorChips"></div></div>
           <div class="sf-rng sf-cell-wide"><div class="sf-head"><span class="sf-label">Regions</span></div><div class="sf-chips" id="sfRegionChips"></div></div>
         </div>
@@ -531,7 +533,9 @@ function initScatterFilters(D){
     {p:'Spread',f:'Credit Spread',step:5,fmt:function(v){return Math.round(v)+' bp';}},
     {p:'Dur',f:'Duration',step:0.1,fmt:function(v){return (+v).toFixed(1)+'a';}},
     {p:'Delta',f:'Delta',step:1,fmt:function(v){return Math.round(v);}},
-    {p:'Price',f:'Convertible Price',step:1,fmt:function(v){return Math.round(v);}}
+    {p:'Price',f:'Convertible Price',step:1,fmt:function(v){return Math.round(v);}},
+    {p:'Par',f:'Parity',step:1,fmt:function(v){return Math.round(v);}},
+    {p:'Prem',f:'Conversion Premium',step:1,fmt:function(v){return Math.round(v)+'%';}}
   ];
   for(var ri=0;ri<rngs.length;ri++){
     var r=rngs[ri],mn=Infinity,mx=-Infinity;
@@ -569,7 +573,7 @@ function initScatterFilters(D){
 }
 function buildScatter(){
   var D=_scatterD||D1;
-  var keys=['Spread','Dur','Delta','Price','Mat','Iss'],rd={};
+  var keys=['Spread','Dur','Delta','Price','Mat','Iss','Par','Prem'],rd={};
   for(var ki=0;ki<keys.length;ki++){var k=keys[ki];var mn=document.getElementById('sf'+k+'Min'),mx=document.getElementById('sf'+k+'Max');rd[k]={a:+mn.value,b:+mx.value,fmin:+mn.min,fmax:+mx.max};}
   var secsOn=getActiveScatterChips('sfSectorChips'),regsOn=getActiveScatterChips('sfRegionChips');
   function inRng(v,r){if(v==null)return r.a===r.fmin&&r.b===r.fmax;return v>=r.a&&v<=r.b;}
@@ -591,6 +595,8 @@ function buildScatter(){
     if(!inRng(V(d['Convertible Price']),rd.Price))continue;
     if(!inRng(_yr(d.Maturity),rd.Mat))continue;
     if(!inRng(_yr(d['Issue Date']),rd.Iss))continue;
+    if(!inRng(V(d.Parity),rd.Par))continue;
+    if(!inRng(V(d['Conversion Premium']),rd.Prem))continue;
     fAll.push(d);
     var xv=V(d[m.xf]),yv=V(d[m.yf]);
     if(xv==null||yv==null)continue;
