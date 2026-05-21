@@ -288,8 +288,8 @@ function buildHistograms(D,D2arg){
     var datasets;
     if(D2arg){
       var H2=hist(D2arg,s.f,s.bins);
-      datasets=[{label:'D1',data:H.counts,backgroundColor:'rgba(96,165,250,0.55)',borderColor:'#60a5fa',borderWidth:1},
-                {label:'D2',data:H2.counts,backgroundColor:'rgba(167,139,250,0.55)',borderColor:'#a78bfa',borderWidth:1}];
+      datasets=[{label:_shortLbl(F1,28)||'D1',data:H.counts,backgroundColor:'rgba(96,165,250,0.55)',borderColor:'#60a5fa',borderWidth:1},
+                {label:_shortLbl(F2,28)||'D2',data:H2.counts,backgroundColor:'rgba(167,139,250,0.55)',borderColor:'#a78bfa',borderWidth:1}];
     } else {
       datasets=[{data:H.counts,backgroundColor:s.bg,borderColor:s.bc,borderWidth:1}];
     }
@@ -378,7 +378,7 @@ function launchDashboard(){
   document.getElementById('landing').style.display='none';
   document.getElementById('dashboard').style.display='block';
   document.getElementById('chipLabel1').textContent=F1+' ('+D1.length+')';
-  if(D2){for(var i=0;i<D2.length;i++){var _dv2=V(D2[i].Duration);if(_dv2!=null&&_dv2>30)D2[i].Duration=30;}document.getElementById('chip2').style.display='';document.getElementById('chipLabel2').textContent=F2+' ('+D2.length+')';document.getElementById('tabCompare').style.display='';var cl=document.getElementById('sfCmpLabel');var cd=document.getElementById('sfCmp');if(cl)cl.style.display='';if(cd)cd.style.display='flex';}
+  if(D2){for(var i=0;i<D2.length;i++){var _dv2=V(D2[i].Duration);if(_dv2!=null&&_dv2>30)D2[i].Duration=30;}document.getElementById('chip2').style.display='';document.getElementById('chipLabel2').textContent=F2+' ('+D2.length+')';document.getElementById('tabCompare').style.display='';var cl=document.getElementById('sfCmpLabel');var cd=document.getElementById('sfCmp');if(cl)cl.style.display='';if(cd)cd.style.display='flex';_updateCmpLabels();}
   else{var c2=document.getElementById('chip2');if(c2)c2.style.display='none';var tc=document.getElementById('tabCompare');if(tc)tc.style.display='none';var cl=document.getElementById('sfCmpLabel');var cd=document.getElementById('sfCmp');if(cl)cl.style.display='none';if(cd)cd.style.display='none';}
   // Reset to overview tab
   var tabs=document.querySelectorAll('.tab');for(var i=0;i<tabs.length;i++)tabs[i].classList.remove('active');
@@ -461,6 +461,8 @@ function buildDashboard(){
 }
 
 var scatterColorBy='Sector',scatterMode='deltaPrem',scatterFiltersInit=false,_scatterD=null,compareMode='D1';
+function _shortLbl(s,n){s=String(s||'').replace(/\.(xls|xlsx|xlsm|csv)$/i,'');if(n&&s.length>n)s=s.slice(0,n-1)+'…';return s;}
+function _updateCmpLabels(){var f1=_shortLbl(F1,16),f2=_shortLbl(F2,16);var b1=document.querySelector('#sfCmp .btn[data-cmp="D1"]');var b2=document.querySelector('#sfCmp .btn[data-cmp="D2"]');if(b1)b1.textContent=f1||'D1';if(b2)b2.textContent=f2||'D2';}
 var CB_PRICER_URL='../cb_pricer/index.html';
 function cbPricerURL(d){
   var p=new URLSearchParams();
@@ -630,13 +632,14 @@ function buildScatter(){
   var sds,countLabel;
   var colBtns=document.querySelectorAll('#sfColBy .btn');
   if(compareMode==='Both' && has2){
+    var n1=_shortLbl(F1,28)||'D1',n2=_shortLbl(F2,28)||'D2';
     sds=[
-      {label:'D1 • '+(F1||'D1'),data:f1.sd,backgroundColor:'rgba(96,165,250,0.4)',borderColor:'#60a5fa',borderWidth:1},
-      {label:'D2 • '+(F2||'D2'),data:f2.sd,backgroundColor:'rgba(167,139,250,0.4)',borderColor:'#a78bfa',borderWidth:1}
+      {label:n1,data:f1.sd,backgroundColor:'rgba(96,165,250,0.4)',borderColor:'#60a5fa',borderWidth:1},
+      {label:n2,data:f2.sd,backgroundColor:'rgba(167,139,250,0.4)',borderColor:'#a78bfa',borderWidth:1}
     ];
     renderKPIs(f1.fAll);
     buildHistograms(f1.fAll,f2.fAll);
-    countLabel=(f1.sd.length+f2.sd.length)+' pts ('+f1.sd.length+' D1 + '+f2.sd.length+' D2)';
+    countLabel=(f1.sd.length+f2.sd.length)+' pts ('+f1.sd.length+' '+n1+' + '+f2.sd.length+' '+n2+')';
     for(var i=0;i<colBtns.length;i++){colBtns[i].style.opacity='0.4';colBtns[i].style.pointerEvents='none';}
   } else {
     var fA=(compareMode==='D2'&&has2)?f2:f1;
@@ -648,7 +651,7 @@ function buildScatter(){
     for(var i=0;i<grpKeys.length;i++){var gk=grpKeys[i],pts=[];for(var j=0;j<fA.sd.length;j++)if(fA.sd[j][colorKey]===gk)pts.push(fA.sd[j]);sds.push({label:gk,data:pts,backgroundColor:col[gk]+'66',borderColor:col[gk],borderWidth:1});}
     renderKPIs(fA.fAll);
     buildHistograms(fA.fAll);
-    countLabel=fA.sd.length+' pts'+(compareMode==='D2'?' (D2)':'');
+    countLabel=fA.sd.length+' pts'+(compareMode==='D2'?' ('+(_shortLbl(F2,20)||'D2')+')':'');
     for(var i=0;i<colBtns.length;i++){colBtns[i].style.opacity='';colBtns[i].style.pointerEvents='';}
   }
   var ct=document.getElementById('scatterCount');if(ct)ct.textContent=countLabel;
@@ -817,7 +820,7 @@ document.addEventListener('DOMContentLoaded', function(){
           var chipLabel2 = document.getElementById('chipLabel2');
           if(chipLabel2) chipLabel2.textContent = name + ' (' + arr.length + ')';
           compUploadArea.innerHTML = '<div style="color:#34d399;font-weight:600">\u2713 ' + name + ' (' + arr.length + ' inst.)</div>';
-          var cl=document.getElementById('sfCmpLabel');var cd=document.getElementById('sfCmp');if(cl)cl.style.display='';if(cd)cd.style.display='flex';
+          var cl=document.getElementById('sfCmpLabel');var cd=document.getElementById('sfCmp');if(cl)cl.style.display='';if(cd)cd.style.display='flex';_updateCmpLabels();
           scatterFiltersInit=false;try{initScatterFilters(D1);buildScatter();}catch(e3){console.error(e3);}
           try { buildComparison(); } catch(e) { console.error(e); alert('Comparison error: ' + e.message); }
         });
@@ -839,7 +842,7 @@ document.addEventListener('DOMContentLoaded', function(){
           var chipLabel2 = document.getElementById('chipLabel2');
           if(chipLabel2) chipLabel2.textContent = name + ' (' + arr.length + ')';
           compUploadArea.innerHTML = '<div style="color:#34d399;font-weight:600">\u2713 ' + name + ' (' + arr.length + ' inst.)</div>';
-          var cl=document.getElementById('sfCmpLabel');var cd=document.getElementById('sfCmp');if(cl)cl.style.display='';if(cd)cd.style.display='flex';
+          var cl=document.getElementById('sfCmpLabel');var cd=document.getElementById('sfCmp');if(cl)cl.style.display='';if(cd)cd.style.display='flex';_updateCmpLabels();
           scatterFiltersInit=false;try{initScatterFilters(D1);buildScatter();}catch(e3){console.error(e3);}
           try { buildComparison(); } catch(e2) { console.error(e2); alert('Comparison error: ' + e2.message); }
         });
