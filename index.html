@@ -530,6 +530,8 @@ function initScatterFilters(D){
     for(var i=0;i<D.length;i++){var v=V(D[i][r.f]);if(v!=null){if(v<mn)mn=v;if(v>mx)mx=v;}}
     if(!isFinite(mn)){mn=0;mx=100;}
     mn=Math.floor(mn/r.step)*r.step;mx=Math.ceil(mx/r.step)*r.step;
+    var _dec=Math.max(0,-Math.floor(Math.log10(r.step)));
+    mn=+mn.toFixed(_dec);mx=+mx.toFixed(_dec);
     setupScatterDualRange(r.p,mn,mx,r.step,r.fmt);
   }
   var matMn=Infinity,matMx=-Infinity,issMn=Infinity,issMx=-Infinity;
