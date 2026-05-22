@@ -854,7 +854,7 @@ document.addEventListener('DOMContentLoaded', function(){
           if(chipLabel2) chipLabel2.textContent = name + ' (' + arr.length + ')';
           compUploadArea.innerHTML = '<div style="color:#34d399;font-weight:600">\u2713 ' + name + ' (' + arr.length + ' inst.)</div>';
           var cl=document.getElementById('sfCmpLabel');var cd=document.getElementById('sfCmp');if(cl)cl.style.display='';if(cd)cd.style.display='flex';_updateCmpLabels();
-          scatterFiltersInit=false;try{initScatterFilters(D1);buildScatter();}catch(e3){console.error(e3);}
+          scatterFiltersInit=false;try{initScatterFilters(D1);var _bb=document.querySelector('#sfCmp [data-cmp="Both"]');if(_bb)_bb.click();else buildScatter();}catch(e3){console.error(e3);}
           try { buildComparison(); } catch(e) { console.error(e); alert('Comparison error: ' + e.message); }
         });
       };
@@ -876,7 +876,7 @@ document.addEventListener('DOMContentLoaded', function(){
           if(chipLabel2) chipLabel2.textContent = name + ' (' + arr.length + ')';
           compUploadArea.innerHTML = '<div style="color:#34d399;font-weight:600">\u2713 ' + name + ' (' + arr.length + ' inst.)</div>';
           var cl=document.getElementById('sfCmpLabel');var cd=document.getElementById('sfCmp');if(cl)cl.style.display='';if(cd)cd.style.display='flex';_updateCmpLabels();
-          scatterFiltersInit=false;try{initScatterFilters(D1);buildScatter();}catch(e3){console.error(e3);}
+          scatterFiltersInit=false;try{initScatterFilters(D1);var _bb=document.querySelector('#sfCmp [data-cmp="Both"]');if(_bb)_bb.click();else buildScatter();}catch(e3){console.error(e3);}
           try { buildComparison(); } catch(e2) { console.error(e2); alert('Comparison error: ' + e2.message); }
         });
       }
