@@ -204,6 +204,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             <button class="btn btn-accent" data-mode="deltaPrem">Δ vs Premium</button>
             <button class="btn" data-mode="gammaDelta">Γ vs Δ</button>
             <button class="btn" data-mode="pricePar">CB Price vs Parity</button>
+            <button class="btn" data-mode="deltaIV">Δ vs Impl. Vol.</button>
           </div>
           <span class="sf-toolbar-label">Color by:</span>
           <div id="sfColBy" style="display:flex;gap:0.3rem;flex-wrap:wrap">
@@ -633,7 +634,8 @@ function buildScatter(){
   var modes={
     deltaPrem:{xf:'Delta',yf:'Conversion Premium',xL:'Delta',yL:'Premium (%)',xMin:0,xMax:100,yMin:-30,yMax:200,xD:1,yD:1,yS:'%',title:'Δ vs Premium'},
     gammaDelta:{xf:'Delta',yf:'Gamma',xL:'Delta',yL:'Gamma',xMin:0,xMax:100,xD:1,yD:3,yS:'',title:'Γ vs Δ'},
-    pricePar:{xf:'Parity',yf:'Convertible Price',xL:'Parity',yL:'CB Price',xD:1,yD:1,yS:'',title:'CB Price vs Parity'}
+    pricePar:{xf:'Parity',yf:'Convertible Price',xL:'Parity',yL:'CB Price',xD:1,yD:1,yS:'',title:'CB Price vs Parity'},
+    deltaIV:{xf:'Delta',yf:'Implied Vol.',xL:'Delta',yL:'Impl. Vol. (%)',xMin:0,xMax:100,xD:1,yD:1,yS:'%',title:'Δ vs Impl. Vol.'}
   };
   var m=modes[scatterMode]||modes.deltaPrem;
   var tEl=document.getElementById('scatterTitle');if(tEl)tEl.textContent='Scatter — '+m.title;
@@ -687,13 +689,39 @@ function buildScatter(){
     countLabel=fA.sd.length+' pts'+(compareMode==='D2'?' ('+(_shortLbl(F2,20)||'D2')+')':'');
     for(var i=0;i<colBtns.length;i++){colBtns[i].style.opacity='';colBtns[i].style.pointerEvents='';}
   }
+  if(m.yf==='Implied Vol.'){
+    function ivStats(arr){
+      var sv=0,sw=0,n=0,su=0;
+      for(var i=0;i<arr.length;i++){var d=arr[i];var v=V(d['Implied Vol.']);if(v==null)continue;var w=V(d['Index Weight'])||0;if(w>0){sv+=v*w;sw+=w;}su+=v;n++;}
+      return{w:sw>0?sv/sw:null,u:n>0?su/n:null};
+    }
+    function lineDS(label,y,color,dash){
+      return{type:'line',label:label,data:[{x:m.xMin,y:y},{x:m.xMax,y:y}],borderColor:color,backgroundColor:color,borderWidth:2,borderDash:dash,pointRadius:0,pointHoverRadius:0,fill:false,parsing:false,order:-1};
+    }
+    var lines=[];
+    if(compareMode==='Both' && has2){
+      var n1=_shortLbl(F1,28)||'D1',n2=_shortLbl(F2,28)||'D2';
+      var s1=ivStats(f1.fAll),s2=ivStats(f2.fAll);
+      if(s1.w!=null)lines.push(lineDS(n1+' wAvg IV '+s1.w.toFixed(1)+'%',s1.w,'#60a5fa',[]));
+      if(s1.u!=null)lines.push(lineDS(n1+' Avg IV '+s1.u.toFixed(1)+'%',s1.u,'#60a5fa',[6,4]));
+      if(s2.w!=null)lines.push(lineDS(n2+' wAvg IV '+s2.w.toFixed(1)+'%',s2.w,'#a78bfa',[]));
+      if(s2.u!=null)lines.push(lineDS(n2+' Avg IV '+s2.u.toFixed(1)+'%',s2.u,'#a78bfa',[6,4]));
+    } else {
+      var src=(compareMode==='D2'&&has2)?f2.fAll:f1.fAll;
+      var lbl=(compareMode==='D2'&&has2)?(_shortLbl(F2,28)||'D2'):(has2?(_shortLbl(F1,28)||'D1'):'');
+      var s=ivStats(src);var pre=lbl?lbl+' ':'';
+      if(s.w!=null)lines.push(lineDS(pre+'wAvg IV '+s.w.toFixed(1)+'%',s.w,'#fbbf24',[]));
+      if(s.u!=null)lines.push(lineDS(pre+'Avg IV '+s.u.toFixed(1)+'%',s.u,'#fbbf24',[6,4]));
+    }
+    for(var li=0;li<lines.length;li++)sds.push(lines[li]);
+  }
   var ct=document.getElementById('scatterCount');if(ct)ct.textContent=countLabel;
   var c=document.getElementById('scatterChart');var existing=Chart.getChart(c);if(existing)existing.destroy();
   new Chart(c,{type:'bubble',data:{datasets:sds},options:{responsive:true,maintainAspectRatio:false,
     onHover:function(evt,els){if(evt&&evt.native&&evt.native.target)evt.native.target.style.cursor=els.length?'pointer':'default';},
     onClick:function(evt,els,chart){if(!els.length)return;var el=els[0];var pt=chart.data.datasets[el.datasetIndex].data[el.index];if(pt&&pt._ref)window.open(cbPricerURL(pt._ref),'_blank','noopener');},
     scales:{x:Object.assign({title:{display:true,text:m.xL}},m.xMin!=null?{min:m.xMin,max:m.xMax}:{}),y:Object.assign({title:{display:true,text:m.yL}},m.yMin!=null?{min:m.yMin,max:m.yMax}:{})},
-    plugins:{legend:{position:'bottom',labels:{font:{size:9}}},tooltip:{callbacks:{label:function(ctx){var p=ctx.raw;return p.label+' • '+p.sector+' / '+p.region+' ('+p.ccy+') • '+m.xL+'='+(+p.x).toFixed(m.xD)+' • '+m.yL+'='+(+p.y).toFixed(m.yD)+m.yS+'  (click → pricer)';}}}}}});
+    plugins:{legend:{position:'bottom',labels:{font:{size:9}}},tooltip:{filter:function(ctx){return ctx.dataset&&ctx.dataset.type!=='line';},callbacks:{label:function(ctx){var p=ctx.raw;if(!p||p.label==null)return'';return p.label+' • '+p.sector+' / '+p.region+' ('+p.ccy+') • '+m.xL+'='+(+p.x).toFixed(m.xD)+' • '+m.yL+'='+(+p.y).toFixed(m.yD)+m.yS+'  (click → pricer)';}}}}}});
 }
 var sortCol='Index Weight',sortAsc=false;
 function getFiltered(){
