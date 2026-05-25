@@ -713,7 +713,7 @@ function renderTable(){
   renderKPIs(f);
   var mvF=0,mvT=0;for(var k=0;k<f.length;k++){var mv=V(f[k]['Market Cap (USDm)']);if(mv!=null)mvF+=mv;}for(var k=0;k<D1.length;k++){var mv2=V(D1[k]['Market Cap (USDm)']);if(mv2!=null)mvT+=mv2;}
   var fmt=function(x){return x>=1000?(x/1000).toFixed(2)+' USDbn':x.toFixed(0)+' USDm';};
-  document.getElementById('sizeTag').textContent='Taille: '+fmt(mvF)+(mvF<mvT?' / '+fmt(mvT):'');
+  document.getElementById('sizeTag').textContent='Taille: '+fmt(mvF)+(mvF<mvT?' / '+fmt(mvT)+' ('+(mvT>0?(mvF/mvT*100).toFixed(1):'0.0')+'%)':'');
   var ths=document.querySelectorAll('#mainTable th');for(var i=0;i<ths.length;i++){ths[i].classList.remove('sorted-asc','sorted-desc');if(ths[i].getAttribute('data-sort')===sortCol)ths[i].classList.add(sortAsc?'sorted-asc':'sorted-desc');}
   var h='';for(var i=0;i<f.length;i++){var d=f[i];h+='<tr><td class="name-cell">'+d._dn+'</td><td>'+(d.Sector||'\u2014')+'</td><td>'+(d.Country||'\u2014')+'</td><td>'+(d['Bond Currency']||'\u2014')+'</td><td>'+F$(V(d['Convertible Price']),2)+'</td><td>'+F$(V(d['Index Weight']),3)+'</td><td>'+F$(V(d['Market Cap (USDm)']),0)+'</td><td>'+F$(V(d.Delta),1)+'</td><td>'+F$(V(d.Gamma),3)+'</td><td>'+F$(V(d.Vega),3)+'</td><td class="'+((V(d['Rho (10bp)'])||0)<0?'num-neg':'num-pos')+'">'+F$(V(d['Rho (10bp)']),3)+'</td><td>'+F$(V(d['Credit Spread']),0)+'</td><td>'+F$(V(d['Implied Vol.']),1)+'</td><td>'+F$(V(d['Input Vol.']),1)+'</td><td>'+F$(V(d['Conversion Premium']),1)+'</td><td>'+F$(V(d.Parity),1)+'</td><td>'+F$(V(d.Duration),2)+'</td><td><a class="pricer-link" target="_blank" rel="noopener" href="'+cbPricerURL(d)+'" title="Price this CB">↗</a></td></tr>';}
   document.getElementById('tableBody').innerHTML=h;
