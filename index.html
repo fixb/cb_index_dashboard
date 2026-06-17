@@ -348,14 +348,14 @@ function buildHistograms(D,D2arg){
     var ex=Chart.getChart(c);if(ex)ex.destroy();
     // Each histogram shows the distribution under all OTHER bin selections, and highlights its own selected bar.
     var H=hist(applyBinSel(D,s.f),s.f,s.bins,s.w);
-    var sel=binSel[s.f];var n=H.counts.length;
+    var sel=_selSet(s.f);var n=H.counts.length;
     var datasets;
     if(D2arg){
       var H2=hist(applyBinSel(D2arg,s.f),s.f,s.bins,s.w);
       datasets=[{label:_shortLbl(F1,28)||'D1',data:H.counts,backgroundColor:'rgba(96,165,250,0.55)',borderColor:_hiBorder('#60a5fa',n,sel),borderWidth:_hiWidth(n,sel)},
                 {label:_shortLbl(F2,28)||'D2',data:H2.counts,backgroundColor:'rgba(167,139,250,0.55)',borderColor:_hiBorder('#a78bfa',n,sel),borderWidth:_hiWidth(n,sel)}];
     } else {
-      var bg=sel?H.counts.map(function(_x,bi){return bi===sel.idx?s.bc:s.bg;}):s.bg;
+      var bg=sel.on?H.counts.map(function(_x,bi){return sel.set[bi]?s.bc:s.bg;}):s.bg;
       datasets=[{data:H.counts,backgroundColor:bg,borderColor:_hiBorder(s.bc,n,sel),borderWidth:_hiWidth(n,sel)}];
     }
     new Chart(c,{type:'bar',data:{labels:H.labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,
@@ -692,14 +692,17 @@ function renderWIF(){
 
 var scatterColorBy='Sector',scatterMode='deltaPrem',scatterFiltersInit=false,_scatterD=null,compareMode='D1';
 // ==== Cross-filter: clicking a histogram bin filters the whole distribution view ====
+// binSel: field -> array of {lo,hi,idx} (multiple bars per histogram = OR within a field, AND across fields)
 var binSel={};
-function hasBinSel(){for(var k in binSel){if(binSel.hasOwnProperty(k))return true;}return false;}
+function hasBinSel(){for(var k in binSel){if(binSel.hasOwnProperty(k)&&binSel[k].length)return true;}return false;}
 function applyBinSel(data,exceptField){
-  var keys=[];for(var k in binSel){if(binSel.hasOwnProperty(k)&&k!==exceptField)keys.push(k);}
+  var keys=[];for(var k in binSel){if(binSel.hasOwnProperty(k)&&k!==exceptField&&binSel[k].length)keys.push(k);}
   if(!keys.length)return data;
   var out=[];
   for(var i=0;i<data.length;i++){var d=data[i],ok=true;
-    for(var j=0;j<keys.length;j++){var s=binSel[keys[j]],v=V(d[keys[j]]);if(v==null||v<s.lo||v>=s.hi){ok=false;break;}}
+    for(var j=0;j<keys.length;j++){var arr=binSel[keys[j]],v=V(d[keys[j]]),inAny=false;
+      if(v!=null){for(var b=0;b<arr.length;b++){if(v>=arr[b].lo&&v<arr[b].hi){inAny=true;break;}}}
+      if(!inAny){ok=false;break;}}
     if(ok)out.push(d);}
   return out;
 }
@@ -711,25 +714,35 @@ function crossFilt(f){
   return{sd:sd,fAll:fAll};
 }
 function toggleBin(field,bins,idx){
-  var cur=binSel[field];
-  if(cur&&cur.idx===idx)delete binSel[field];
-  else binSel[field]={lo:bins[idx],hi:bins[idx+1],idx:idx,label:bins[idx]+'–'+bins[idx+1]};
+  var arr=binSel[field]||(binSel[field]=[]);
+  var pos=-1;for(var i=0;i<arr.length;i++){if(arr[i].idx===idx){pos=i;break;}}
+  if(pos>=0)arr.splice(pos,1);
+  else arr.push({lo:bins[idx],hi:bins[idx+1],idx:idx});
+  if(!arr.length)delete binSel[field];else arr.sort(function(a,b){return a.idx-b.idx;});
   buildScatter();updateBinChips();
 }
 function clearBin(field){delete binSel[field];buildScatter();updateBinChips();}
 function clearAllBins(){binSel={};buildScatter();updateBinChips();}
 var BINSEL_LABELS={'Delta':'Delta','Credit Spread':'Spread','Conversion Premium':'Premium','Implied Vol.':'Impl. Vol.','Input Vol.':'Input Vol.','Gamma':'Gamma'};
+function _binLabel(arr){ // arr sorted by idx; merge contiguous bins into a single range
+  var parts=[],i=0;
+  while(i<arr.length){var lo=arr[i].lo,hi=arr[i].hi,j=i;
+    while(j+1<arr.length&&arr[j+1].idx===arr[j].idx+1){j++;hi=arr[j].hi;}
+    parts.push(lo+'–'+hi);i=j+1;}
+  return parts.join(', ');
+}
 function updateBinChips(){
   var bar=document.getElementById('binSelBar');if(!bar)return;
-  var keys=[];for(var k in binSel){if(binSel.hasOwnProperty(k))keys.push(k);}
+  var keys=[];for(var k in binSel){if(binSel.hasOwnProperty(k)&&binSel[k].length)keys.push(k);}
   if(!keys.length){bar.style.display='none';bar.innerHTML='';return;}
   var h='<span class="binsel-title">Filter by selection:</span>';
-  for(var i=0;i<keys.length;i++){var kk=keys[i],s=binSel[kk];h+='<span class="binsel-chip" onclick="clearBin(\''+kk.replace(/'/g,"\\'")+'\')">'+(BINSEL_LABELS[kk]||kk)+': '+s.label+' ✕</span>';}
+  for(var i=0;i<keys.length;i++){var kk=keys[i];h+='<span class="binsel-chip" onclick="clearBin(\''+kk.replace(/'/g,"\\'")+'\')">'+(BINSEL_LABELS[kk]||kk)+': '+_binLabel(binSel[kk])+' ✕</span>';}
   h+='<span class="binsel-clear" onclick="clearAllBins()">Clear all</span>';
   bar.innerHTML=h;bar.style.display='flex';
 }
-function _hiWidth(n,sel){if(!sel)return 1;var a=[];for(var i=0;i<n;i++)a.push(i===sel.idx?2.5:1);return a;}
-function _hiBorder(base,n,sel){if(!sel)return base;var a=[];for(var i=0;i<n;i++)a.push(i===sel.idx?'#f8fafc':base);return a;}
+function _selSet(field){var s={},arr=binSel[field]||[];for(var i=0;i<arr.length;i++)s[arr[i].idx]=1;return{set:s,on:arr.length>0};}
+function _hiWidth(n,sel){if(!sel.on)return 1;var a=[];for(var i=0;i<n;i++)a.push(sel.set[i]?2.5:1);return a;}
+function _hiBorder(base,n,sel){if(!sel.on)return base;var a=[];for(var i=0;i<n;i++)a.push(sel.set[i]?'#f8fafc':base);return a;}
 function _shortLbl(s,n){s=String(s||'').replace(/\.(xls|xlsx|xlsm|csv)$/i,'');if(n&&s.length>n)s=s.slice(0,n-1)+'…';return s;}
 function _updateCmpLabels(){var f1=_shortLbl(F1,16),f2=_shortLbl(F2,16);var b1=document.querySelector('#sfCmp .btn[data-cmp="D1"]');var b2=document.querySelector('#sfCmp .btn[data-cmp="D2"]');if(b1)b1.textContent=f1||'D1';if(b2)b2.textContent=f2||'D2';}
 var CB_PRICER_URL='../cb_pricer/index.html';
