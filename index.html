@@ -185,6 +185,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   .comp-card{padding:0.6rem}.comp-card .comp-old,.comp-card .comp-new{font-size:0.8rem}
   #landing{padding:1rem}#landing h1{font-size:1.4rem}
 }
+.binsel-bar{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin:0.4rem 0 0.9rem;padding:0.5rem 0.7rem;background:var(--surface2);border:1px solid var(--accent);border-radius:8px}
+.binsel-title{font-size:0.72rem;color:var(--text-dim);font-weight:600}
+.binsel-chip{font-size:0.72rem;background:var(--accent);color:#0b1220;font-weight:600;padding:0.2rem 0.55rem;border-radius:999px;cursor:pointer;user-select:none}
+.binsel-chip:hover{opacity:0.82}
+.binsel-clear{font-size:0.72rem;color:var(--text-dim);cursor:pointer;text-decoration:underline;margin-left:auto}
+.binsel-clear:hover{color:var(--text)}
 </style>
 
 </head>
@@ -243,7 +249,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         </div>
       </div>
       <div class="chart-wrap" style="height:360px"><canvas id="scatterChart"></canvas></div>
-    </div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Delta distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="deltaHist"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Spread distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="spreadHist"></canvas></div></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Premium distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="premiumHist"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Impl. Vol. distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="volHist"></canvas></div></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Implied − Input Vol distribution (pts)</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="volDiffHist"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Gamma exposure distribution (Γ × weight)</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="gammaHist"></canvas></div></div></div></div><div class="card"><div class="card-header"><h3>Gamma concentration (Lorenz)</h3><span class="tag" id="gammaGiniTag" style="margin-left:0.5rem"></span></div><div class="card-body"><div class="chart-wrap" style="height:300px"><canvas id="gammaLorenz"></canvas></div></div></div><div class="card" style="font-size:0.72rem;line-height:1.5"><div class="card-header"><h3 style="font-size:0.78rem">FTSE Global Focus — Index rules</h3></div><div class="card-body" style="color:var(--text-dim);display:grid;grid-template-columns:1fr 1fr;gap:1rem"><div><div style="color:var(--text);font-weight:600;margin-bottom:0.3rem">Retention (drop rules)</div><ul style="margin:0;padding-left:1rem"><li>Conversion Premium ≤ 100%</li><li>CB Price &gt; 60% and &lt; 140%</li></ul></div><div><div style="color:var(--text);font-weight:600;margin-bottom:0.3rem">Addition (inclusion rules)</div><ul style="margin:0;padding-left:1rem"><li>Conversion Premium &lt; 75%</li><li>CB Price &gt; 70% and &lt; 125%</li><li>Min size: US $500m · Europe €375m (≈$433m) · Asia ex-Japan $275m · Japan ¥22bn (≈$150m)</li></ul></div></div></div></div>
+    </div></div><div id="binSelBar" class="binsel-bar" style="display:none"></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Delta distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="deltaHist"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Spread distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="spreadHist"></canvas></div></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Premium distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="premiumHist"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Impl. Vol. distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="volHist"></canvas></div></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Input Vol distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="volDiffHist"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Gamma exposure distribution (Γ × weight)</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="gammaHist"></canvas></div></div></div></div><div class="card"><div class="card-header"><h3>Gamma concentration (Lorenz)</h3><span class="tag" id="gammaGiniTag" style="margin-left:0.5rem"></span></div><div class="card-body"><div class="chart-wrap" style="height:300px"><canvas id="gammaLorenz"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Constituents — selection</h3><div style="display:flex;align-items:center;gap:0.7rem;flex-wrap:wrap"><span class="tag">reflects active filters & bin selection</span><span class="tag tag-green" id="distListTag"></span></div></div><div class="card-body"><div class="scroll-x scroll-y-table"><table class="data-table" id="distListTable"><thead><tr><th>Instrument</th><th>Sector</th><th>Country</th><th>Currency</th><th>CB Price</th><th>Weight %</th><th>MV (USDm)</th><th>Delta</th><th>Gamma</th><th>Vega</th><th>Rho</th><th>Spread</th><th>Impl. Vol.</th><th>Input Vol.</th><th>Premium %</th><th>Parity</th><th>Duration</th><th title="Open in cb_pricer">↗</th></tr></thead><tbody id="distListBody"></tbody></table></div></div></div><div class="card" style="font-size:0.72rem;line-height:1.5"><div class="card-header"><h3 style="font-size:0.78rem">FTSE Global Focus — Index rules</h3></div><div class="card-body" style="color:var(--text-dim);display:grid;grid-template-columns:1fr 1fr;gap:1rem"><div><div style="color:var(--text);font-weight:600;margin-bottom:0.3rem">Retention (drop rules)</div><ul style="margin:0;padding-left:1rem"><li>Conversion Premium ≤ 100%</li><li>CB Price &gt; 60% and &lt; 140%</li></ul></div><div><div style="color:var(--text);font-weight:600;margin-bottom:0.3rem">Addition (inclusion rules)</div><ul style="margin:0;padding-left:1rem"><li>Conversion Premium &lt; 75%</li><li>CB Price &gt; 70% and &lt; 125%</li><li>Min size: US $500m · Europe €375m (≈$433m) · Asia ex-Japan $275m · Japan ¥22bn (≈$150m)</li></ul></div></div></div></div>
     <div class="panel" id="panel-whatif">
       <div class="card"><div class="card-header"><h3>Scenario inputs</h3><div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap"><span class="tag">1-day P&amp;L estimate</span><button class="btn" onclick="resetWIF()">↻ Reset</button></div></div><div class="card-body"><div class="wif-inputs" id="wifInputs"></div><div id="wifModelInfo" style="margin-top:0.9rem;padding:0.55rem 0.8rem;background:var(--surface2);border:1px dashed var(--border);border-radius:6px;font-size:0.68rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace"></div></div></div>
       <div class="card"><div class="card-header"><h3>Estimated 1-day index P&amp;L</h3><span class="tag tag-green" id="wifSummaryTag"></span></div><div class="card-body"><div class="wif-kpis" id="wifKpis"></div></div></div>
@@ -334,23 +340,29 @@ function buildHistograms(D,D2arg){
     {id:'spreadHist',f:'Credit Spread',bins:[0,50,100,150,200,300,400,500,750,1000,2000],bg:'rgba(167,139,250,0.6)',bc:'#a78bfa'},
     {id:'premiumHist',f:'Conversion Premium',bins:[-20,0,10,20,30,40,50,60,80,100,150,300],bg:'rgba(52,211,153,0.6)',bc:'#34d399'},
     {id:'volHist',f:'Implied Vol.',bins:[0,15,20,25,30,35,40,50,60,80,120],bg:'rgba(251,191,36,0.6)',bc:'#fbbf24'},
-    {id:'volDiffHist',f:function(d){var a=V(d['Implied Vol.']),b=V(d['Input Vol.']);return(a==null||b==null)?null:a-b;},bins:[-40,-20,-10,-5,-2,0,2,5,10,20,40,100],bg:'rgba(244,114,182,0.6)',bc:'#f472b6'},
+    {id:'volDiffHist',f:'Input Vol.',bins:[0,15,20,25,30,35,40,50,60,80,120],bg:'rgba(56,189,248,0.6)',bc:'#38bdf8'},
     {id:'gammaHist',f:'Gamma',w:'Index Weight',bins:[0,0.0001,0.0003,0.001,0.003,0.01,0.03,0.1,0.3],bg:'rgba(251,146,60,0.6)',bc:'#fb923c'}
   ];
-  for(var i=0;i<specs.length;i++){
-    var s=specs[i];var c=document.getElementById(s.id);if(!c)continue;
+  specs.forEach(function(s){
+    var c=document.getElementById(s.id);if(!c)return;
     var ex=Chart.getChart(c);if(ex)ex.destroy();
-    var H=hist(D,s.f,s.bins,s.w);
+    // Each histogram shows the distribution under all OTHER bin selections, and highlights its own selected bar.
+    var H=hist(applyBinSel(D,s.f),s.f,s.bins,s.w);
+    var sel=binSel[s.f];var n=H.counts.length;
     var datasets;
     if(D2arg){
-      var H2=hist(D2arg,s.f,s.bins,s.w);
-      datasets=[{label:_shortLbl(F1,28)||'D1',data:H.counts,backgroundColor:'rgba(96,165,250,0.55)',borderColor:'#60a5fa',borderWidth:1},
-                {label:_shortLbl(F2,28)||'D2',data:H2.counts,backgroundColor:'rgba(167,139,250,0.55)',borderColor:'#a78bfa',borderWidth:1}];
+      var H2=hist(applyBinSel(D2arg,s.f),s.f,s.bins,s.w);
+      datasets=[{label:_shortLbl(F1,28)||'D1',data:H.counts,backgroundColor:'rgba(96,165,250,0.55)',borderColor:_hiBorder('#60a5fa',n,sel),borderWidth:_hiWidth(n,sel)},
+                {label:_shortLbl(F2,28)||'D2',data:H2.counts,backgroundColor:'rgba(167,139,250,0.55)',borderColor:_hiBorder('#a78bfa',n,sel),borderWidth:_hiWidth(n,sel)}];
     } else {
-      datasets=[{data:H.counts,backgroundColor:s.bg,borderColor:s.bc,borderWidth:1}];
+      var bg=sel?H.counts.map(function(_x,bi){return bi===sel.idx?s.bc:s.bg;}):s.bg;
+      datasets=[{data:H.counts,backgroundColor:bg,borderColor:_hiBorder(s.bc,n,sel),borderWidth:_hiWidth(n,sel)}];
     }
-    new Chart(c,{type:'bar',data:{labels:H.labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:!!D2arg,position:'bottom',labels:{font:{size:9},boxWidth:10}}}}});
-  }
+    new Chart(c,{type:'bar',data:{labels:H.labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,
+      onClick:function(evt,els){if(!els||!els.length)return;toggleBin(s.f,s.bins,els[0].index);},
+      onHover:function(e,els){if(e&&e.native&&e.native.target)e.native.target.style.cursor=els.length?'pointer':'default';},
+      plugins:{legend:{display:!!D2arg,position:'bottom',labels:{font:{size:9},boxWidth:10}}}}});
+  });
 }
 function hist(data,f,bins,wf){
   var isFn=typeof f==='function';
@@ -489,6 +501,7 @@ function buildDashboard(){
   // Destroy existing Chart.js instances to allow rebuild
   ['regionPie','ccyPie','deltaHist','spreadHist','premiumHist','volHist','volDiffHist','gammaHist','gammaLorenz','scatterChart','greeksHeatmap','gammaChart','vegaChart','rhoChart','deltaWeightChart','regionDeltaChart','regionSpreadChart','regionEdgeChart'].forEach(function(id){var c=document.getElementById(id);if(c){var ch=Chart.getChart(c);if(ch)ch.destroy();}});
   var D=D1;
+  binSel={};updateBinChips();
   Chart.defaults.color='#94a3b8';Chart.defaults.borderColor='#1e293b';Chart.defaults.font.family="'DM Sans',sans-serif";Chart.defaults.font.size=11;
   renderKPIs(D);
 
@@ -678,6 +691,45 @@ function renderWIF(){
 }
 
 var scatterColorBy='Sector',scatterMode='deltaPrem',scatterFiltersInit=false,_scatterD=null,compareMode='D1';
+// ==== Cross-filter: clicking a histogram bin filters the whole distribution view ====
+var binSel={};
+function hasBinSel(){for(var k in binSel){if(binSel.hasOwnProperty(k))return true;}return false;}
+function applyBinSel(data,exceptField){
+  var keys=[];for(var k in binSel){if(binSel.hasOwnProperty(k)&&k!==exceptField)keys.push(k);}
+  if(!keys.length)return data;
+  var out=[];
+  for(var i=0;i<data.length;i++){var d=data[i],ok=true;
+    for(var j=0;j<keys.length;j++){var s=binSel[keys[j]],v=V(d[keys[j]]);if(v==null||v<s.lo||v>=s.hi){ok=false;break;}}
+    if(ok)out.push(d);}
+  return out;
+}
+function crossFilt(f){
+  if(!hasBinSel())return{sd:f.sd,fAll:f.fAll};
+  var fAll=applyBinSel(f.fAll,null);
+  var set=new Set(fAll),sd=[];
+  for(var j=0;j<f.sd.length;j++){if(set.has(f.sd[j]._ref))sd.push(f.sd[j]);}
+  return{sd:sd,fAll:fAll};
+}
+function toggleBin(field,bins,idx){
+  var cur=binSel[field];
+  if(cur&&cur.idx===idx)delete binSel[field];
+  else binSel[field]={lo:bins[idx],hi:bins[idx+1],idx:idx,label:bins[idx]+'–'+bins[idx+1]};
+  buildScatter();updateBinChips();
+}
+function clearBin(field){delete binSel[field];buildScatter();updateBinChips();}
+function clearAllBins(){binSel={};buildScatter();updateBinChips();}
+var BINSEL_LABELS={'Delta':'Delta','Credit Spread':'Spread','Conversion Premium':'Premium','Implied Vol.':'Impl. Vol.','Input Vol.':'Input Vol.','Gamma':'Gamma'};
+function updateBinChips(){
+  var bar=document.getElementById('binSelBar');if(!bar)return;
+  var keys=[];for(var k in binSel){if(binSel.hasOwnProperty(k))keys.push(k);}
+  if(!keys.length){bar.style.display='none';bar.innerHTML='';return;}
+  var h='<span class="binsel-title">Filter by selection:</span>';
+  for(var i=0;i<keys.length;i++){var kk=keys[i],s=binSel[kk];h+='<span class="binsel-chip" onclick="clearBin(\''+kk.replace(/'/g,"\\'")+'\')">'+(BINSEL_LABELS[kk]||kk)+': '+s.label+' ✕</span>';}
+  h+='<span class="binsel-clear" onclick="clearAllBins()">Clear all</span>';
+  bar.innerHTML=h;bar.style.display='flex';
+}
+function _hiWidth(n,sel){if(!sel)return 1;var a=[];for(var i=0;i<n;i++)a.push(i===sel.idx?2.5:1);return a;}
+function _hiBorder(base,n,sel){if(!sel)return base;var a=[];for(var i=0;i<n;i++)a.push(i===sel.idx?'#f8fafc':base);return a;}
 function _shortLbl(s,n){s=String(s||'').replace(/\.(xls|xlsx|xlsm|csv)$/i,'');if(n&&s.length>n)s=s.slice(0,n-1)+'…';return s;}
 function _updateCmpLabels(){var f1=_shortLbl(F1,16),f2=_shortLbl(F2,16);var b1=document.querySelector('#sfCmp .btn[data-cmp="D1"]');var b2=document.querySelector('#sfCmp .btn[data-cmp="D2"]');if(b1)b1.textContent=f1||'D1';if(b2)b2.textContent=f2||'D2';}
 var CB_PRICER_URL='../cb_pricer/index.html';
@@ -847,21 +899,25 @@ function buildScatter(){
   var has2=!!D2;
   var f1=filterDS(D1);
   var f2=(has2&&(compareMode==='D2'||compareMode==='Both'))?filterDS(D2):{sd:[],fAll:[]};
+  // cf* = scatter-filter result narrowed by the active histogram-bin selection (cross-filter)
+  var cf1=crossFilt(f1),cf2=crossFilt(f2);
   var sds,countLabel;
   var colBtns=document.querySelectorAll('#sfColBy .btn');
   if(compareMode==='Both' && has2){
     var n1=_shortLbl(F1,28)||'D1',n2=_shortLbl(F2,28)||'D2';
     sds=[
-      {label:n1,data:f1.sd,backgroundColor:'rgba(96,165,250,0.4)',borderColor:'#60a5fa',borderWidth:1},
-      {label:n2,data:f2.sd,backgroundColor:'rgba(167,139,250,0.4)',borderColor:'#a78bfa',borderWidth:1}
+      {label:n1,data:cf1.sd,backgroundColor:'rgba(96,165,250,0.4)',borderColor:'#60a5fa',borderWidth:1},
+      {label:n2,data:cf2.sd,backgroundColor:'rgba(167,139,250,0.4)',borderColor:'#a78bfa',borderWidth:1}
     ];
-    renderKPIs(f1.fAll);
+    renderKPIs(cf1.fAll);
     buildHistograms(f1.fAll,f2.fAll);
-    buildLorenz(f1.fAll,f2.fAll);
-    countLabel=(f1.sd.length+f2.sd.length)+' pts ('+f1.sd.length+' '+n1+' + '+f2.sd.length+' '+n2+')';
+    buildLorenz(cf1.fAll,cf2.fAll);
+    renderDistList(cf1.fAll);
+    countLabel=(cf1.sd.length+cf2.sd.length)+' pts ('+cf1.sd.length+' '+n1+' + '+cf2.sd.length+' '+n2+')';
     for(var i=0;i<colBtns.length;i++){colBtns[i].style.opacity='0.4';colBtns[i].style.pointerEvents='none';}
   } else {
-    var fA=(compareMode==='D2'&&has2)?f2:f1;
+    var base=(compareMode==='D2'&&has2)?f2:f1;
+    var fA=(compareMode==='D2'&&has2)?cf2:cf1;
     var colorKey=scatterColorBy==='Region'?'region':(scatterColorBy==='Currency'?'ccy':'sector');
     var grpSet={};for(var i=0;i<fA.sd.length;i++)grpSet[fA.sd[i][colorKey]]=1;
     var grpKeys=Object.keys(grpSet).sort(),col={};
@@ -869,8 +925,9 @@ function buildScatter(){
     sds=[];
     for(var i=0;i<grpKeys.length;i++){var gk=grpKeys[i],pts=[];for(var j=0;j<fA.sd.length;j++)if(fA.sd[j][colorKey]===gk)pts.push(fA.sd[j]);sds.push({label:gk,data:pts,backgroundColor:col[gk]+'66',borderColor:col[gk],borderWidth:1});}
     renderKPIs(fA.fAll);
-    buildHistograms(fA.fAll);
+    buildHistograms(base.fAll);
     buildLorenz(fA.fAll);
+    renderDistList(fA.fAll);
     countLabel=fA.sd.length+' pts'+(compareMode==='D2'?' ('+(_shortLbl(F2,20)||'D2')+')':'');
     for(var i=0;i<colBtns.length;i++){colBtns[i].style.opacity='';colBtns[i].style.pointerEvents='';}
   }
@@ -886,13 +943,13 @@ function buildScatter(){
     var lines=[];
     if(compareMode==='Both' && has2){
       var n1=_shortLbl(F1,28)||'D1',n2=_shortLbl(F2,28)||'D2';
-      var s1=ivStats(f1.fAll),s2=ivStats(f2.fAll);
+      var s1=ivStats(cf1.fAll),s2=ivStats(cf2.fAll);
       if(s1.w!=null)lines.push(lineDS(n1+' wAvg IV '+s1.w.toFixed(1)+'%',s1.w,'#60a5fa',[]));
       if(s1.u!=null)lines.push(lineDS(n1+' Avg IV '+s1.u.toFixed(1)+'%',s1.u,'#60a5fa',[6,4]));
       if(s2.w!=null)lines.push(lineDS(n2+' wAvg IV '+s2.w.toFixed(1)+'%',s2.w,'#a78bfa',[]));
       if(s2.u!=null)lines.push(lineDS(n2+' Avg IV '+s2.u.toFixed(1)+'%',s2.u,'#a78bfa',[6,4]));
     } else {
-      var src=(compareMode==='D2'&&has2)?f2.fAll:f1.fAll;
+      var src=(compareMode==='D2'&&has2)?cf2.fAll:cf1.fAll;
       var lbl=(compareMode==='D2'&&has2)?(_shortLbl(F2,28)||'D2'):(has2?(_shortLbl(F1,28)||'D1'):'');
       var s=ivStats(src);var pre=lbl?lbl+' ':'';
       if(s.w!=null)lines.push(lineDS(pre+'wAvg IV '+s.w.toFixed(1)+'%',s.w,'#fbbf24',[]));
@@ -930,6 +987,14 @@ function renderTable(){
   var ths=document.querySelectorAll('#mainTable th');for(var i=0;i<ths.length;i++){ths[i].classList.remove('sorted-asc','sorted-desc');if(ths[i].getAttribute('data-sort')===sortCol)ths[i].classList.add(sortAsc?'sorted-asc':'sorted-desc');}
   var h='';for(var i=0;i<f.length;i++){var d=f[i];h+='<tr><td class="name-cell">'+d._dn+'</td><td>'+(d.Sector||'\u2014')+'</td><td>'+(d.Country||'\u2014')+'</td><td>'+(d['Bond Currency']||'\u2014')+'</td><td>'+F$(V(d['Convertible Price']),2)+'</td><td>'+F$(V(d['Index Weight']),3)+'</td><td>'+F$(V(d['Market Cap (USDm)']),0)+'</td><td>'+F$(V(d.Delta),1)+'</td><td>'+F$(V(d.Gamma),3)+'</td><td>'+F$(V(d.Vega),3)+'</td><td class="'+((V(d['Rho (10bp)'])||0)<0?'num-neg':'num-pos')+'">'+F$(V(d['Rho (10bp)']),3)+'</td><td>'+F$(V(d['Credit Spread']),0)+'</td><td>'+F$(V(d['Implied Vol.']),1)+'</td><td>'+F$(V(d['Input Vol.']),1)+'</td><td>'+F$(V(d['Conversion Premium']),1)+'</td><td>'+F$(V(d.Parity),1)+'</td><td>'+F$(V(d.Duration),2)+'</td><td><a class="pricer-link" target="_blank" rel="noopener" href="'+cbPricerURL(d)+'" title="Price this CB">↗</a></td></tr>';}
   document.getElementById('tableBody').innerHTML=h;
+}
+function cbRowHtml(d){return '<tr><td class="name-cell">'+d._dn+'</td><td>'+(d.Sector||'—')+'</td><td>'+(d.Country||'—')+'</td><td>'+(d['Bond Currency']||'—')+'</td><td>'+F$(V(d['Convertible Price']),2)+'</td><td>'+F$(V(d['Index Weight']),3)+'</td><td>'+F$(V(d['Market Cap (USDm)']),0)+'</td><td>'+F$(V(d.Delta),1)+'</td><td>'+F$(V(d.Gamma),3)+'</td><td>'+F$(V(d.Vega),3)+'</td><td class="'+((V(d['Rho (10bp)'])||0)<0?'num-neg':'num-pos')+'">'+F$(V(d['Rho (10bp)']),3)+'</td><td>'+F$(V(d['Credit Spread']),0)+'</td><td>'+F$(V(d['Implied Vol.']),1)+'</td><td>'+F$(V(d['Input Vol.']),1)+'</td><td>'+F$(V(d['Conversion Premium']),1)+'</td><td>'+F$(V(d.Parity),1)+'</td><td>'+F$(V(d.Duration),2)+'</td><td><a class="pricer-link" target="_blank" rel="noopener" href="'+cbPricerURL(d)+'" title="Price this CB">↗</a></td></tr>';}
+function renderDistList(data){
+  var body=document.getElementById('distListBody');if(!body)return;
+  var arr=data.slice().sort(function(a,b){return(V(b['Index Weight'])||0)-(V(a['Index Weight'])||0);});
+  var tag=document.getElementById('distListTag');if(tag)tag.textContent=arr.length+' / '+D1.length;
+  var h='';for(var i=0;i<arr.length;i++)h+=cbRowHtml(arr[i]);
+  body.innerHTML=h;
 }
 function initTable(D){
   var sSet={},rSet={},cSet={};for(var i=0;i<D.length;i++){if(D[i].Sector)sSet[D[i].Sector]=1;if(D[i].Region)rSet[D[i].Region]=1;if(D[i]['Bond Currency'])cSet[D[i]['Bond Currency']]=1;}
