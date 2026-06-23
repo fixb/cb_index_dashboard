@@ -207,7 +207,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div id="loadStatus">Loading libraries...</div>
 </div>
 <div id="dashboard">
-  <div class="header"><div class="header-left"><h1>FTSE Convertible Bond Index</h1><div class="subtitle" id="headerSub">Global Focus (USD)</div></div><div class="header-right"><div class="file-chip"><span class="dot" style="background:var(--accent)"></span><span id="chipLabel1">D1</span></div><div class="file-chip" id="chip2" style="display:none"><span class="dot" style="background:var(--accent2)"></span><span id="chipLabel2">D2</span></div><button class="btn btn-accent" onclick="resetDashboard()">↻ Import</button></div></div>
+  <div class="header"><div class="header-left"><h1>FTSE Convertible Bond Index</h1><div class="subtitle" id="headerSub">Global Focus (USD)</div></div><div class="header-right"><div class="file-chip"><span class="dot" style="background:var(--accent)"></span><span id="chipLabel1">D1</span></div><div class="file-chip" id="chip2" style="display:none"><span class="dot" style="background:var(--accent2)"></span><span id="chipLabel2">D2</span></div><button class="btn btn-green" onclick="exportWorkbook()" title="Exporter tout en Excel (multi-feuilles)">⬇ Excel</button><button class="btn btn-accent" onclick="resetDashboard()">↻ Import</button></div></div>
   <div class="kpi-strip" id="kpiStrip"></div>
   <div class="tabs"><div class="tab active" data-tab="overview">Overview</div><div class="tab" data-tab="greeks">Greeks</div><div class="tab" data-tab="geo">Geography</div><div class="tab" data-tab="constituents">Constituents</div><div class="tab" data-tab="distribution">Distributions</div><div class="tab" data-tab="whatif" style="color:var(--orange)">🎯 What-If</div><div class="tab" data-tab="compare" id="tabCompare" style="display:none;color:var(--accent2)">⚡ Comparison</div></div>
   <div class="content">
@@ -1182,6 +1182,127 @@ document.addEventListener('DOMContentLoaded', function(){
     document.body.innerHTML = '<div style="color:#f87171;padding:2rem;font-family:sans-serif"><h2>Erreur Dashboard</h2><pre>' + err.message + '\n' + (err.stack||'') + '</pre></div>';
   }
 });
+
+/* ============================================================
+   EXPORTS — per-chart image (PNG/JPEG) + multi-sheet workbook
+   ============================================================ */
+var _IMG_BG='#111827'; // = --surface, so charts blend with their card
+
+function _slug(s){return String(s||'chart').trim().replace(/[^\w\-]+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'').slice(0,60)||'chart';}
+
+// Composite a Chart.js canvas onto an opaque background and return a dataURL.
+// type: 'png' (default, lossless, crisp text) or 'jpeg'.
+function _chartDataURL(canvasId,type){
+  var ch=(typeof Chart!=='undefined'&&Chart.getChart)?Chart.getChart(canvasId):null;
+  if(!ch||!ch.canvas)return null;
+  var src=ch.canvas;
+  var c=document.createElement('canvas');c.width=src.width;c.height=src.height;
+  var ctx=c.getContext('2d');
+  ctx.fillStyle=_IMG_BG;ctx.fillRect(0,0,c.width,c.height);
+  ctx.drawImage(src,0,0);
+  return c.toDataURL(type==='jpeg'?'image/jpeg':'image/png',type==='jpeg'?0.95:undefined);
+}
+
+function dlChartImg(canvasId,title,type){
+  var url=_chartDataURL(canvasId,type);
+  if(!url){alert('No chart to export here yet — load data first.');return;}
+  dl(url,'FTSE_'+_slug(title||canvasId)+'.'+(type==='jpeg'?'jpg':'png'));
+}
+
+// Add a "⬇ PNG" button to every card that contains a chart canvas. Idempotent.
+function injectChartImgButtons(){
+  var cans=document.querySelectorAll('.chart-wrap canvas, canvas');
+  for(var i=0;i<cans.length;i++){
+    var can=cans[i];if(!can.id)continue;
+    var card=can.closest('.card');if(!card)continue;
+    var hdr=card.querySelector('.card-header');if(!hdr)continue;
+    if(hdr.querySelector('.img-dl-btn[data-cv="'+can.id+'"]'))continue;
+    var h3=hdr.querySelector('h3');var title=h3?h3.textContent:can.id;
+    // Right-side container: reuse an existing flex/btn-group wrapper, else make one.
+    var slot=hdr.querySelector('.btn-group');
+    if(!slot){slot=document.createElement('div');slot.style.cssText='display:flex;align-items:center;gap:0.5rem;margin-left:auto;flex-wrap:wrap';hdr.appendChild(slot);}
+    var b=document.createElement('button');
+    b.className='btn img-dl-btn';b.setAttribute('data-cv',can.id);b.title='Télécharger ce graphique en PNG (Maj+clic = JPEG)';
+    b.innerHTML='⬇ PNG';
+    (function(id,t){b.addEventListener('click',function(e){dlChartImg(id,t,e.shiftKey?'jpeg':'png');});})(can.id,title);
+    slot.appendChild(b);
+  }
+}
+
+/* ---- Multi-sheet Excel workbook ---------------------------- */
+var _WB_METRICS=[
+  ['Delta','Wtd Delta'],['Gamma','Wtd Gamma'],['Vega','Wtd Vega'],['Rho (10bp)','Wtd Rho'],
+  ['Credit Spread','Wtd Spread'],['Implied Vol.','Wtd Impl Vol'],['Input Vol.','Wtd Input Vol'],
+  ['Conversion Premium','Wtd Premium'],['Parity','Wtd Parity'],['Duration','Wtd Duration']
+];
+var _WB_DIST=[
+  {f:'Delta',label:'Delta',bins:[0,10,20,30,40,50,60,70,80,90,100]},
+  {f:'Credit Spread',label:'Spread (bps)',bins:[0,50,100,150,200,300,400,500,750,1000,2000]},
+  {f:'Conversion Premium',label:'Premium %',bins:[-20,0,10,20,30,40,50,60,80,100,150,300]},
+  {f:'Implied Vol.',label:'Impl. Vol. %',bins:[0,15,20,25,30,35,40,50,60,80,120]},
+  {f:'Input Vol.',label:'Input Vol. %',bins:[0,15,20,25,30,35,40,50,60,80,120]}
+];
+
+function _grpSheet(data,key){
+  var mt=_WB_METRICS.map(function(m){return m[0];});
+  var g=grp(data,key,mt);
+  var head=[key,'Count','Weight %'].concat(_WB_METRICS.map(function(m){return m[1];}));
+  var rows=[head];
+  for(var i=0;i<g.length;i++){var o=g[i];var r=[o.name,o.count,o.weight!=null?+o.weight.toFixed(3):''];
+    for(var j=0;j<mt.length;j++){var v=o['w_'+mt[j]];r.push(v!=null?+v.toFixed(4):'');}rows.push(r);}
+  return XLSX.utils.aoa_to_sheet(rows);
+}
+
+function _distSheet(data){
+  var rows=[];
+  for(var s=0;s<_WB_DIST.length;s++){
+    var spec=_WB_DIST[s];rows.push([spec.label+' distribution']);rows.push(['Range','Count','% of universe']);
+    var counts=[],n=0,b;
+    for(b=0;b<spec.bins.length-1;b++)counts.push(0);
+    for(var i=0;i<data.length;i++){var v=V(data[i][spec.f]);if(v==null)continue;n++;
+      for(b=0;b<spec.bins.length-1;b++){var last=(b===spec.bins.length-2);
+        if(v>=spec.bins[b]&&(v<spec.bins[b+1]||(last&&v<=spec.bins[b+1]))){counts[b]++;break;}}}
+    for(b=0;b<spec.bins.length-1;b++)rows.push([spec.bins[b]+' – '+spec.bins[b+1],counts[b],n>0?+(counts[b]/n*100).toFixed(1):0]);
+    rows.push([]);
+  }
+  return XLSX.utils.aoa_to_sheet(rows);
+}
+
+function exportWorkbook(){
+  if(typeof XLSX==='undefined'){alert('XLSX library not loaded yet.');return;}
+  if(typeof D1==='undefined'||!D1||!D1.length){alert('Load data first.');return;}
+  var f=getFiltered();
+  var wb=XLSX.utils.book_new();
+
+  // Sheet 1 — Constituents (respects active filters)
+  var h=['Instrument','ISIN','Sector','Country','Region','Currency','CB Price','Coupon','Maturity','Weight','MV USDm','Delta','Gamma','Vega','Rho','Spread','Impl Vol','Input Vol','Premium','Parity','Duration'];
+  var ff=['_dn','ISIN','Sector','Country','Region','Bond Currency','Convertible Price','Coupon','Maturity','Index Weight','Market Cap (USDm)','Delta','Gamma','Vega','Rho (10bp)','Credit Spread','Implied Vol.','Input Vol.','Conversion Premium','Parity','Duration'];
+  var crows=[h];for(var i=0;i<f.length;i++){var d=f[i],r=[];for(var j=0;j<ff.length;j++)r.push(d[ff[j]]!=null?d[ff[j]]:'');crows.push(r);}
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(crows),'Constituents');
+
+  // Sheets 2-4 — weighted summaries
+  XLSX.utils.book_append_sheet(wb,_grpSheet(f,'Sector'),'By Sector');
+  XLSX.utils.book_append_sheet(wb,_grpSheet(f,'Region'),'By Region');
+  XLSX.utils.book_append_sheet(wb,_grpSheet(f,'Bond Currency'),'By Currency');
+
+  // Sheet 5 — distributions
+  XLSX.utils.book_append_sheet(wb,_distSheet(f),'Distributions');
+
+  // Sheet 6 — comparison (only if a comparison file was loaded)
+  if(window._compRows&&window._compRows.length){
+    var cr=window._compRows;
+    var ch2=[['Instrument','Sector','Status','Price D2','Price D1','Δ Price','Weight D2','Weight D1','Δ Weight','Δ Delta','Δ Gamma','Δ Vega','Δ Spread']];
+    for(var k=0;k<cr.length;k++){var x=cr[k];ch2.push([x.name,x.sector||'',x.status,x.p2,x.p1,x.dp,x.w2,x.w1,x.dw,x.dd,x.dg,x.dv,x.ds]);}
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(ch2),'Comparison');
+  }
+
+  var b64=XLSX.write(wb,{bookType:'xlsx',type:'base64'});
+  dl('data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+b64,'FTSE_CB_Dashboard.xlsx');
+}
+
+// Inject the per-chart buttons once the static layout is in the DOM.
+if(document.readyState!=='loading')injectChartImgButtons();
+else document.addEventListener('DOMContentLoaded',injectChartImgButtons);
 
 </script>
 </body>
