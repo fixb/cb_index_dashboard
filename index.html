@@ -81,6 +81,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .filter-bar input,.filter-bar select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:0.45rem 0.7rem;border-radius:6px;font-size:0.78rem;font-family:'DM Sans',sans-serif;outline:none}
 .filter-bar input:focus,.filter-bar select:focus{border-color:var(--accent)}
 .filter-bar input{flex:1;min-width:170px}.filter-bar select{min-width:130px}
+.ac-wrap{position:relative;flex:1;min-width:200px}
+.ac-wrap input{width:100%}
+.ac-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:6px;max-height:280px;overflow-y:auto;z-index:50;display:none;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+.ac-list.show{display:block}
+.ac-item{padding:0.5rem 0.7rem;font-size:0.75rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:0.7rem;border-bottom:1px solid rgba(30,41,59,0.5)}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover,.ac-item.active{background:rgba(96,165,250,0.12)}
+.ac-item .ac-sub{color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:0.64rem;white-space:nowrap}
+.ac-item mark{background:rgba(96,165,250,0.3);color:var(--text);border-radius:2px}
+.ac-empty{padding:0.6rem 0.7rem;font-size:0.72rem;color:var(--text-dim)}
 .chart-wrap{position:relative;height:280px}
 .btn-group{display:flex;gap:0.5rem;flex-wrap:wrap}
 .comp-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:1rem;margin-bottom:1.5rem}
@@ -279,7 +289,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         </ul></div>
       </div></div>
     </div>
-    <div class="panel" id="panel-compare"><div id="compUploadArea" style="border:2px dashed #334155;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;margin-bottom:1.5rem;transition:all 0.3s"><div style="font-size:1.5rem;margin-bottom:0.5rem">📈</div><div style="font-size:0.9rem;font-weight:600;color:#e2e8f0">Load a comparison file</div><div style="font-size:0.7rem;color:#64748b;margin-top:0.3rem">.xls / .xlsx — drag or click</div></div><div class="comp-summary" id="compSummary"></div><div class="card"><div class="card-header"><h3>Waterfall — Greeks change by sector</h3><div class="btn-group" id="compMetricBtns"><button class="btn btn-accent active" data-m="Delta" onclick="switchWF('Delta')">Delta</button><button class="btn" data-m="Gamma" onclick="switchWF('Gamma')">Gamma</button><button class="btn" data-m="Vega" onclick="switchWF('Vega')">Vega</button><button class="btn" data-m="Rho (10bp)" onclick="switchWF('Rho (10bp)')">Rho</button><button class="btn" data-m="Credit Spread" onclick="switchWF('Credit Spread')">Spread</button><button class="btn" data-m="Implied Vol." onclick="switchWF('Implied Vol.')">Impl. Vol.</button></div></div><div class="card-body"><div class="chart-wrap" style="height:360px"><canvas id="wfChart"></canvas></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Δ Weight by sector</h3></div><div class="card-body"><div class="chart-wrap" style="height:320px"><canvas id="wfWeightSec"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Δ Weight by region</h3></div><div class="card-body"><div class="chart-wrap" style="height:320px"><canvas id="wfWeightReg"></canvas></div></div></div></div><div class="card"><div class="card-header"><h3>Change details</h3><div class="btn-group"><button class="btn btn-accent" onclick="exportCompCSV()">⬇ CSV</button><button class="btn" onclick="copyCompCSV()">📋 Copy</button></div></div><div class="card-body scroll-x scroll-y-table" id="compTableWrap"></div></div></div>
+    <div class="panel" id="panel-compare"><div id="compUploadArea" style="border:2px dashed #334155;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;margin-bottom:1.5rem;transition:all 0.3s"><div style="font-size:1.5rem;margin-bottom:0.5rem">📈</div><div style="font-size:0.9rem;font-weight:600;color:#e2e8f0">Load a comparison file</div><div style="font-size:0.7rem;color:#64748b;margin-top:0.3rem">.xls / .xlsx — drag or click</div></div><div class="comp-summary" id="compSummary"></div><div class="card"><div class="card-header"><h3>Waterfall — Greeks change by sector</h3><div class="btn-group" id="compMetricBtns"><button class="btn btn-accent active" data-m="Delta" onclick="switchWF('Delta')">Delta</button><button class="btn" data-m="Gamma" onclick="switchWF('Gamma')">Gamma</button><button class="btn" data-m="Vega" onclick="switchWF('Vega')">Vega</button><button class="btn" data-m="Rho (10bp)" onclick="switchWF('Rho (10bp)')">Rho</button><button class="btn" data-m="Credit Spread" onclick="switchWF('Credit Spread')">Spread</button><button class="btn" data-m="Implied Vol." onclick="switchWF('Implied Vol.')">Impl. Vol.</button></div></div><div class="card-body"><div class="chart-wrap" style="height:360px"><canvas id="wfChart"></canvas></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Δ Weight by sector</h3></div><div class="card-body"><div class="chart-wrap" style="height:320px"><canvas id="wfWeightSec"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Δ Weight by region</h3></div><div class="card-body"><div class="chart-wrap" style="height:320px"><canvas id="wfWeightReg"></canvas></div></div></div></div><div class="card"><div class="card-header"><h3>Change details</h3><div class="btn-group"><button class="btn btn-accent" onclick="exportCompCSV()">⬇ CSV</button><button class="btn" onclick="copyCompCSV()">📋 Copy</button></div></div><div class="card-body"><div class="filter-bar"><div class="ac-wrap"><input type="text" id="compSearch" placeholder="Search instrument / ISIN / sector…" autocomplete="off"><div class="ac-list" id="compSuggest"></div></div><span class="tag" id="compCountTag"></span></div><div class="scroll-x scroll-y-table" id="compTableWrap"></div></div></div></div>
   </div>
 </div>
 
@@ -1074,11 +1084,52 @@ function renderCompTable(){
     rows.push({isin:isin,name:(a||b)._dn,sector:cur.Sector,status:status,w1:a?V(a['Index Weight']):null,w2:b?V(b['Index Weight']):null,p1:a?V(a['Convertible Price']):null,p2:b?V(b['Convertible Price']):null,dw:dw,dd:dd,dg:dg,dv:dv,ds:ds,dp:dp});
   });
   rows.sort(function(a,b){if(a.status!==b.status){var o={'\ud83c\udd95 Entered':0,'\ud83d\udd34 Exited':1,'Common':2};return(o[a.status]||3)-(o[b.status]||3);}return Math.abs(b.dw||0)-Math.abs(a.dw||0);});
+  window._compRows=rows;fillCompTable();setupCompSearch();
+}
+function fillCompTable(){
+  var rows=window._compRows||[];
+  var q=(document.getElementById('compSearch').value||'').toLowerCase().trim();
+  var shown=q?rows.filter(function(r){return(r.name||'').toLowerCase().indexOf(q)>=0||(r.isin||'').toLowerCase().indexOf(q)>=0||(r.sector||'').toLowerCase().indexOf(q)>=0;}):rows;
   var cc=function(v){return v==null?'':v>0.001?'chg-up':v<-0.001?'chg-down':'chg-flat';};
   var cf=function(v,d){return v==null?'\u2014':(v>=0?'+':'')+v.toFixed(d);};
   var h='<table class="data-table"><thead><tr><th>Instrument</th><th>Sector</th><th>Status</th><th>Price D2</th><th>Price D1</th><th>\u0394 Price</th><th>Weight D2</th><th>Weight D1</th><th>\u0394 Weight</th><th>\u0394 Delta</th><th>\u0394 Gamma</th><th>\u0394 Vega</th><th>\u0394 Spread</th></tr></thead><tbody>';
-  for(var i=0;i<rows.length;i++){var r=rows[i];h+='<tr><td class="name-cell">'+r.name+'</td><td>'+(r.sector||'\u2014')+'</td><td>'+r.status+'</td><td>'+F$(r.p2,2)+'</td><td>'+F$(r.p1,2)+'</td><td class="'+cc(r.dp)+'">'+cf(r.dp,2)+'</td><td>'+F$(r.w2,3)+'</td><td>'+F$(r.w1,3)+'</td><td class="'+cc(r.dw)+'">'+cf(r.dw,3)+'</td><td class="'+cc(r.dd)+'">'+cf(r.dd,1)+'</td><td class="'+cc(r.dg)+'">'+cf(r.dg,3)+'</td><td class="'+cc(r.dv)+'">'+cf(r.dv,3)+'</td><td class="'+cc(r.ds)+'">'+cf(r.ds,0)+'</td></tr>';}
-  h+='</tbody></table>';document.getElementById('compTableWrap').innerHTML=h;window._compRows=rows;
+  if(!shown.length)h+='<tr><td colspan="13" style="text-align:center;color:var(--text-dim);padding:1.2rem">No instruments match \u201c'+q+'\u201d</td></tr>';
+  for(var i=0;i<shown.length;i++){var r=shown[i];h+='<tr><td class="name-cell">'+r.name+'</td><td>'+(r.sector||'\u2014')+'</td><td>'+r.status+'</td><td>'+F$(r.p2,2)+'</td><td>'+F$(r.p1,2)+'</td><td class="'+cc(r.dp)+'">'+cf(r.dp,2)+'</td><td>'+F$(r.w2,3)+'</td><td>'+F$(r.w1,3)+'</td><td class="'+cc(r.dw)+'">'+cf(r.dw,3)+'</td><td class="'+cc(r.dd)+'">'+cf(r.dd,1)+'</td><td class="'+cc(r.dg)+'">'+cf(r.dg,3)+'</td><td class="'+cc(r.dv)+'">'+cf(r.dv,3)+'</td><td class="'+cc(r.ds)+'">'+cf(r.ds,0)+'</td></tr>';}
+  h+='</tbody></table>';document.getElementById('compTableWrap').innerHTML=h;
+  var ct=document.getElementById('compCountTag');if(ct)ct.textContent=q?shown.length+' / '+rows.length:rows.length+' instruments';
+}
+var _compAcIdx=-1;
+function setupCompSearch(){
+  if(setupCompSearch._wired)return;setupCompSearch._wired=true;
+  var inp=document.getElementById('compSearch'),sug=document.getElementById('compSuggest');
+  var esc=function(s){return String(s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});};
+  var closeSug=function(){sug.classList.remove('show');sug.innerHTML='';_compAcIdx=-1;};
+  var renderSug=function(){
+    var q=inp.value.toLowerCase().trim();if(!q){closeSug();return;}
+    var rows=window._compRows||[];var seen={},out=[];
+    for(var i=0;i<rows.length&&out.length<12;i++){var r=rows[i];var nm=(r.name||'').toLowerCase(),is=(r.isin||'').toLowerCase();
+      if(nm.indexOf(q)<0&&is.indexOf(q)<0&&(r.sector||'').toLowerCase().indexOf(q)<0)continue;
+      if(seen[r.isin])continue;seen[r.isin]=1;out.push(r);}
+    if(!out.length){sug.innerHTML='<div class="ac-empty">No match</div>';sug.classList.add('show');_compAcIdx=-1;return;}
+    var hl=function(t){t=String(t||'');var idx=t.toLowerCase().indexOf(q);if(idx<0)return esc(t);return esc(t.slice(0,idx))+'<mark>'+esc(t.slice(idx,idx+q.length))+'</mark>'+esc(t.slice(idx+q.length));};
+    var h='';for(var j=0;j<out.length;j++){var r=out[j];h+='<div class="ac-item" data-name="'+esc(r.name)+'"><span>'+hl(r.name)+'</span><span class="ac-sub">'+esc(r.sector||'')+' \u00b7 '+esc(r.isin||'')+'</span></div>';}
+    sug.innerHTML=h;sug.classList.add('show');_compAcIdx=-1;
+  };
+  var pick=function(name){inp.value=name;closeSug();fillCompTable();};
+  inp.addEventListener('input',function(){fillCompTable();renderSug();});
+  inp.addEventListener('focus',function(){if(inp.value.trim())renderSug();});
+  inp.addEventListener('keydown',function(e){
+    var items=sug.querySelectorAll('.ac-item');
+    if(e.key==='ArrowDown'){if(!items.length)return;e.preventDefault();_compAcIdx=Math.min(_compAcIdx+1,items.length-1);}
+    else if(e.key==='ArrowUp'){if(!items.length)return;e.preventDefault();_compAcIdx=Math.max(_compAcIdx-1,0);}
+    else if(e.key==='Enter'){if(_compAcIdx>=0&&items[_compAcIdx]){e.preventDefault();pick(items[_compAcIdx].getAttribute('data-name'));}else closeSug();return;}
+    else if(e.key==='Escape'){inp.value='';closeSug();fillCompTable();return;}
+    else return;
+    for(var i=0;i<items.length;i++)items[i].classList.toggle('active',i===_compAcIdx);
+    if(items[_compAcIdx])items[_compAcIdx].scrollIntoView({block:'nearest'});
+  });
+  sug.addEventListener('mousedown',function(e){var it=e.target.closest('.ac-item');if(it){e.preventDefault();pick(it.getAttribute('data-name'));}});
+  document.addEventListener('click',function(e){if(!e.target.closest('.ac-wrap'))closeSug();});
 }
 function exportCompCSV(){if(!window._compRows)return;var r=window._compRows;var c='\uFEFF'+'Instrument;Sector;Status;Price D2;Price D1;D Price;Weight D2;Weight D1;D Weight;D Delta;D Gamma;D Vega;D Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.ds!=null?x.ds.toFixed(0):''].join(';')+'\n';}dl('data:text/csv;charset=utf-8,'+encodeURIComponent(c),'FTSE_Comparison.csv');}
 function copyCompCSV(){if(!window._compRows)return;var r=window._compRows;var c='Instrument\tSector\tStatus\tPrice D2\tPrice D1\tD Price\tWeight D2\tWeight D1\tD Weight\tD Delta\tD Gamma\tD Vega\tD Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.ds!=null?x.ds.toFixed(0):''].join('\t')+'\n';}cp(c,'Comparison');}
