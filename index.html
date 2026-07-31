@@ -933,14 +933,16 @@ function buildScatter(){
   // Route the data sources based on the active Compare mode. srcA is the primary
   // dataset; srcB (when twoUp) is overlaid. Set modes (Common/OnlyD1/OnlyD2)
   // partition by ISIN so filters + bin selection still apply on top of the subset.
-  var srcA=D1,srcB=null,twoUp=false,lblA=_shortLbl(F1,28)||'D1',lblB=_shortLbl(F2,28)||'D2';
+  var srcA=D1,srcB=null,twoUp=false,distTotal=null,lblA=_shortLbl(F1,28)||'D1',lblB=_shortLbl(F2,28)||'D2';
   if(has2){var _cmp=(compareMode==='Common'||compareMode==='Union'||compareMode==='Diff')?_cmpSets():null;
+    // For set modes the reference universe is the union (combined) size, not D1.
+    var _uni=_cmp?_cmp.commonA.length+_cmp.onlyA.length+_cmp.onlyB.length:0;
     switch(compareMode){
       case 'D2': srcA=D2; lblA=_shortLbl(F2,28)||'D2'; break;
       case 'Both': srcB=D2; twoUp=true; break;
-      case 'Common': srcA=_cmp.commonA; srcB=_cmp.commonB; twoUp=true; lblA=(_shortLbl(F1,20)||'D1')+' ∩'; lblB=(_shortLbl(F2,20)||'D2')+' ∩'; break;
-      case 'Union': srcA=_cmp.commonA.concat(_cmp.onlyA,_cmp.onlyB); lblA='∪ Union'; break;
-      case 'Diff': srcA=_cmp.onlyA; srcB=_cmp.onlyB; twoUp=true; lblA=(_shortLbl(F1,18)||'D1')+' sortis'; lblB=(_shortLbl(F2,18)||'D2')+' ajoutés'; break;
+      case 'Common': srcA=_cmp.commonA; srcB=_cmp.commonB; twoUp=true; distTotal=_uni; lblA=(_shortLbl(F1,20)||'D1')+' ∩'; lblB=(_shortLbl(F2,20)||'D2')+' ∩'; break;
+      case 'Union': srcA=_cmp.commonA.concat(_cmp.onlyA,_cmp.onlyB); distTotal=_uni; lblA='∪ Union'; break;
+      case 'Diff': srcA=_cmp.onlyA; srcB=_cmp.onlyB; twoUp=true; distTotal=_uni; lblA=(_shortLbl(F1,18)||'D1')+' sortis'; lblB=(_shortLbl(F2,18)||'D2')+' ajoutés'; break;
     }
   }
   var f1=filterDS(srcA);
@@ -959,7 +961,7 @@ function buildScatter(){
     buildHistograms(f1.fAll,f2.fAll);
     buildLorenz(cf1.fAll,cf2.fAll);
     // Diff lists both sides (dropped + added); Common lists the shared names (D1 version).
-    renderDistList(compareMode==='Diff'?cf1.fAll.concat(cf2.fAll):cf1.fAll);
+    renderDistList(compareMode==='Diff'?cf1.fAll.concat(cf2.fAll):cf1.fAll,distTotal);
     countLabel=(cf1.sd.length+cf2.sd.length)+' pts ('+cf1.sd.length+' '+n1+' + '+cf2.sd.length+' '+n2+')';
     for(var i=0;i<colBtns.length;i++){colBtns[i].style.opacity='0.4';colBtns[i].style.pointerEvents='none';}
   } else {
@@ -973,7 +975,7 @@ function buildScatter(){
     renderKPIs(fA.fAll);
     buildHistograms(f1.fAll);
     buildLorenz(fA.fAll);
-    renderDistList(fA.fAll);
+    renderDistList(fA.fAll,distTotal);
     countLabel=fA.sd.length+' pts'+(has2&&compareMode!=='D1'?' ('+lblA+')':'');
     for(var i=0;i<colBtns.length;i++){colBtns[i].style.opacity='';colBtns[i].style.pointerEvents='';}
   }
@@ -1035,10 +1037,10 @@ function renderTable(){
   document.getElementById('tableBody').innerHTML=h;
 }
 function cbRowHtml(d){return '<tr><td class="name-cell">'+d._dn+'</td><td>'+(d.Sector||'—')+'</td><td>'+(d.Country||'—')+'</td><td>'+(d['Bond Currency']||'—')+'</td><td>'+F$(V(d['Convertible Price']),2)+'</td><td>'+F$(V(d['Index Weight']),3)+'</td><td>'+F$(V(d['Market Cap (USDm)']),0)+'</td><td>'+F$(V(d.Delta),1)+'</td><td>'+F$(V(d.Gamma),3)+'</td><td>'+F$(V(d.Vega),3)+'</td><td class="'+((V(d['Rho (10bp)'])||0)<0?'num-neg':'num-pos')+'">'+F$(V(d['Rho (10bp)']),3)+'</td><td>'+F$(V(d['Credit Spread']),0)+'</td><td>'+F$(V(d['Implied Vol.']),1)+'</td><td>'+F$(V(d['Input Vol.']),1)+'</td><td>'+F$(V(d['Conversion Premium']),1)+'</td><td>'+F$(V(d.Parity),1)+'</td><td>'+F$(V(d.Duration),2)+'</td><td><a class="pricer-link" target="_blank" rel="noopener" href="'+cbPricerURL(d)+'" title="Price this CB">↗</a></td></tr>';}
-function renderDistList(data){
+function renderDistList(data,total){
   var body=document.getElementById('distListBody');if(!body)return;
   var arr=data.slice().sort(function(a,b){return(V(b['Index Weight'])||0)-(V(a['Index Weight'])||0);});
-  var tag=document.getElementById('distListTag');if(tag)tag.textContent=arr.length+' / '+D1.length;
+  var tag=document.getElementById('distListTag');if(tag)tag.textContent=arr.length+' / '+(total!=null?total:D1.length);
   var h='';for(var i=0;i<arr.length;i++)h+=cbRowHtml(arr[i]);
   body.innerHTML=h;
 }
