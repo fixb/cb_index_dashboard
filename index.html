@@ -254,7 +254,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             <button class="btn" data-by="Currency">Currency</button>
           </div>
           <span class="sf-toolbar-label" id="sfCmpLabel" style="display:none">Compare:</span>
-          <div id="sfCmp" style="display:none;gap:0.3rem;flex-wrap:wrap"><button class="btn btn-accent" data-cmp="D1">D1</button><button class="btn" data-cmp="D2">D2</button><button class="btn" data-cmp="Both">Both</button><span style="width:1px;align-self:stretch;background:var(--border,#334155);margin:0 0.2rem"></span><button class="btn" data-cmp="Common" title="Noms présents dans les deux fichiers (∩)">∩ Commun</button><button class="btn" data-cmp="OnlyD1" title="Noms présents seulement dans D1 (sortis)">D1 only</button><button class="btn" data-cmp="OnlyD2" title="Noms présents seulement dans D2 (ajoutés)">D2 only</button></div>
+          <div id="sfCmp" style="display:none;gap:0.3rem;flex-wrap:wrap"><button class="btn btn-accent" data-cmp="D1">D1</button><button class="btn" data-cmp="D2">D2</button><button class="btn" data-cmp="Both">Both</button><span style="width:1px;align-self:stretch;background:var(--border,#334155);margin:0 0.2rem"></span><button class="btn" data-cmp="Common" title="Noms présents dans les deux fichiers (∩)">∩ Commun</button><button class="btn" data-cmp="Union" title="Tous les noms distincts des deux fichiers (∪)">∪ Union</button><button class="btn" data-cmp="Diff" title="Différence symétrique — noms d'un seul fichier : sortis (D1) vs ajoutés (D2)">Δ Diff</button></div>
           <button class="btn" id="sfReset" style="margin-left:auto">↻ Reset</button>
         </div>
       </div>
@@ -934,13 +934,13 @@ function buildScatter(){
   // dataset; srcB (when twoUp) is overlaid. Set modes (Common/OnlyD1/OnlyD2)
   // partition by ISIN so filters + bin selection still apply on top of the subset.
   var srcA=D1,srcB=null,twoUp=false,lblA=_shortLbl(F1,28)||'D1',lblB=_shortLbl(F2,28)||'D2';
-  if(has2){var _cmp=(compareMode==='Common'||compareMode==='OnlyD1'||compareMode==='OnlyD2')?_cmpSets():null;
+  if(has2){var _cmp=(compareMode==='Common'||compareMode==='Union'||compareMode==='Diff')?_cmpSets():null;
     switch(compareMode){
       case 'D2': srcA=D2; lblA=_shortLbl(F2,28)||'D2'; break;
       case 'Both': srcB=D2; twoUp=true; break;
       case 'Common': srcA=_cmp.commonA; srcB=_cmp.commonB; twoUp=true; lblA=(_shortLbl(F1,20)||'D1')+' ∩'; lblB=(_shortLbl(F2,20)||'D2')+' ∩'; break;
-      case 'OnlyD1': srcA=_cmp.onlyA; lblA=(_shortLbl(F1,20)||'D1')+' only'; break;
-      case 'OnlyD2': srcA=_cmp.onlyB; lblA=(_shortLbl(F2,20)||'D2')+' only'; break;
+      case 'Union': srcA=_cmp.commonA.concat(_cmp.onlyA,_cmp.onlyB); lblA='∪ Union'; break;
+      case 'Diff': srcA=_cmp.onlyA; srcB=_cmp.onlyB; twoUp=true; lblA=(_shortLbl(F1,18)||'D1')+' sortis'; lblB=(_shortLbl(F2,18)||'D2')+' ajoutés'; break;
     }
   }
   var f1=filterDS(srcA);
@@ -958,7 +958,8 @@ function buildScatter(){
     renderKPIs(cf1.fAll);
     buildHistograms(f1.fAll,f2.fAll);
     buildLorenz(cf1.fAll,cf2.fAll);
-    renderDistList(cf1.fAll);
+    // Diff lists both sides (dropped + added); Common lists the shared names (D1 version).
+    renderDistList(compareMode==='Diff'?cf1.fAll.concat(cf2.fAll):cf1.fAll);
     countLabel=(cf1.sd.length+cf2.sd.length)+' pts ('+cf1.sd.length+' '+n1+' + '+cf2.sd.length+' '+n2+')';
     for(var i=0;i<colBtns.length;i++){colBtns[i].style.opacity='0.4';colBtns[i].style.pointerEvents='none';}
   } else {
