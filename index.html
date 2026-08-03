@@ -760,6 +760,7 @@ function cbPricerURL(d){
   var p=new URLSearchParams();
   var add=function(k,v){if(v==null||v==='')return;var n=+v;if(isNaN(n))return;p.set(k,n);};
   if(d._dn)p.set('name',d._dn);
+  if(d['ISIN'])p.set('isin',d['ISIN']);
   add('coupon',V(d.Coupon));
   if(d.Maturity)p.set('T_date',String(d.Maturity).slice(0,10));
   var s=V(d['Equity Price']);add('S',s);
