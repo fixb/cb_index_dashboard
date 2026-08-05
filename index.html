@@ -504,6 +504,7 @@ function renderKPIs(D){
     if(e!=null&&iw>0){edgeSv+=e*iw;edgeSw+=iw;}}
   var ytmMC=ytmSw>0?ytmSv/ytmSw:null,edgeW=edgeSw>0?edgeSv/edgeSw:null;
   var kpis=[{l:'Instruments',v:n,c:'accent'},{l:'Wtd. Delta',v:F$(wAvg(D,'Delta'),2),c:'green'},{l:'Wtd. Gamma',v:F$(wAvg(D,'Gamma'),4),c:'orange'},{l:'Wtd. Vega',v:F$(wAvg(D,'Vega'),4),c:'cyan'},{l:'Rho (10bp)',v:F$(wAvg(D,'Rho (10bp)'),4),c:'pink'},{l:'Spread (bps)',v:F$(wAvg(D,'Credit Spread'),0),c:''},{l:'Duration',v:F$(wAvg(D,'Duration'),2),c:''},{l:'Wtd. Impl. Vol.',v:volW!=null?volW.toFixed(1)+'%':'—',c:'accent'},{l:'Avg. Impl. Vol.',v:volA!=null?volA.toFixed(1)+'%':'—',c:''},{l:'Wtd. YTM (MV)',v:ytmMC!=null?ytmMC.toFixed(2)+'%':'—',c:'accent'},{l:'# YTM > 0',v:ytmPos,c:'green'},{l:'Wtd. Edge to Theo.',v:F$(edgeW,2),c:'orange'}];
+  window._kpiRows=kpis.map(function(k){return[k.l,k.v];});
   var kh='';for(var i=0;i<kpis.length;i++){var k=kpis[i];kh+='<div class="kpi"><div class="label">'+k.l+'</div><div class="value '+k.c+' mono">'+k.v+'</div></div>';}
   document.getElementById('kpiStrip').innerHTML=kh;
 }
@@ -1068,10 +1069,11 @@ function initTable(D){
 function dl(uri,fn){var a=document.createElement('a');a.href=uri;a.download=fn;a.target='_blank';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a)},500);}
 function _cleanName(fn){return String(fn||'').replace(/\.(xls|xlsx|xlsm|csv)$/i,'').replace(/[^A-Za-z0-9._-]+/g,'_').replace(/^_+|_+$/g,'');}
 function _srcTag(fn){var s=_cleanName(fn!=null?fn:F1);return s?'_'+s:'';}
+function _kpiSheet(){var rows=[['Metric','Value'],['Source',F1||'']];var k=window._kpiRows||[];for(var i=0;i<k.length;i++)rows.push([k[i][0],k[i][1]]);return XLSX.utils.aoa_to_sheet(rows);}
 function cp(txt,lbl){try{navigator.clipboard.writeText(txt).then(function(){alert(lbl+' copied!')});}catch(e){var t=document.createElement('textarea');t.value=txt;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert(lbl+' copied!');}}
 function buildCSV(filtered){var h='Instrument\tISIN\tSector\tCountry\tRegion\tCurrency\tCB Price\tCoupon\tMaturity\tWeight %\tMV (USDm)\tDelta\tGamma\tVega\tRho\tSpread\tImpl. Vol.\tInput Vol.\tPremium %\tParity\tDuration\n';var ff=['_dn','ISIN','Sector','Country','Region','Bond Currency','Convertible Price','Coupon','Maturity','Index Weight','Market Cap (USDm)','Delta','Gamma','Vega','Rho (10bp)','Credit Spread','Implied Vol.','Input Vol.','Conversion Premium','Parity','Duration'];for(var i=0;i<filtered.length;i++){var d=filtered[i];var row=[];for(var j=0;j<ff.length;j++){var v=d[ff[j]];row.push(v==null?'':String(v));}h+=row.join('\t')+'\n';}return h;}
 function exportCSV(){var f=getFiltered();var csv='\uFEFF'+buildCSV(f).replace(/\t/g,';');dl('data:text/csv;charset=utf-8,'+encodeURIComponent(csv),'FTSE_CB_Export'+_srcTag()+'.csv');}
-function exportXLSX(){if(typeof XLSX==='undefined')return;var f=getFiltered();var h=['Instrument','ISIN','Sector','Country','Region','Currency','CB Price','Coupon','Maturity','Weight','MV USDm','Delta','Gamma','Vega','Rho','Spread','Impl Vol','Input Vol','Premium','Parity','Duration'];var ff=['_dn','ISIN','Sector','Country','Region','Bond Currency','Convertible Price','Coupon','Maturity','Index Weight','Market Cap (USDm)','Delta','Gamma','Vega','Rho (10bp)','Credit Spread','Implied Vol.','Input Vol.','Conversion Premium','Parity','Duration'];var rows=[h];for(var i=0;i<f.length;i++){var d=f[i];var r=[];for(var j=0;j<ff.length;j++)r.push(d[ff[j]]!=null?d[ff[j]]:'');rows.push(r);}var ws=XLSX.utils.aoa_to_sheet(rows);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Data');var b64=XLSX.write(wb,{bookType:'xlsx',type:'base64'});dl('data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+b64,'FTSE_CB'+_srcTag()+'.xlsx');}
+function exportXLSX(){if(typeof XLSX==='undefined')return;var f=getFiltered();var h=['Instrument','ISIN','Sector','Country','Region','Currency','CB Price','Coupon','Maturity','Weight','MV USDm','Delta','Gamma','Vega','Rho','Spread','Impl Vol','Input Vol','Premium','Parity','Duration'];var ff=['_dn','ISIN','Sector','Country','Region','Bond Currency','Convertible Price','Coupon','Maturity','Index Weight','Market Cap (USDm)','Delta','Gamma','Vega','Rho (10bp)','Credit Spread','Implied Vol.','Input Vol.','Conversion Premium','Parity','Duration'];var rows=[h];for(var i=0;i<f.length;i++){var d=f[i];var r=[];for(var j=0;j<ff.length;j++)r.push(d[ff[j]]!=null?d[ff[j]]:'');rows.push(r);}var ws=XLSX.utils.aoa_to_sheet(rows);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,_kpiSheet(),'Summary');XLSX.utils.book_append_sheet(wb,ws,'Data');var b64=XLSX.write(wb,{bookType:'xlsx',type:'base64'});dl('data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+b64,'FTSE_CB'+_srcTag()+'.xlsx');}
 function copyCSV(){cp(buildCSV(getFiltered()),'Data');}
 
 var wfC=null;
@@ -1357,7 +1359,10 @@ function exportWorkbook(){
   var f=getFiltered();
   var wb=XLSX.utils.book_new();
 
-  // Sheet 1 — Constituents (respects active filters)
+  // Sheet 1 — Summary (cartouche KPIs)
+  XLSX.utils.book_append_sheet(wb,_kpiSheet(),'Summary');
+
+  // Sheet 2 — Constituents (respects active filters)
   var h=['Instrument','ISIN','Sector','Country','Region','Currency','CB Price','Coupon','Maturity','Weight','MV USDm','Delta','Gamma','Vega','Rho','Spread','Impl Vol','Input Vol','Premium','Parity','Duration'];
   var ff=['_dn','ISIN','Sector','Country','Region','Bond Currency','Convertible Price','Coupon','Maturity','Index Weight','Market Cap (USDm)','Delta','Gamma','Vega','Rho (10bp)','Credit Spread','Implied Vol.','Input Vol.','Conversion Premium','Parity','Duration'];
   var crows=[h];for(var i=0;i<f.length;i++){var d=f[i],r=[];for(var j=0;j<ff.length;j++)r.push(d[ff[j]]!=null?d[ff[j]]:'');crows.push(r);}
