@@ -1066,10 +1066,12 @@ function initTable(D){
 }
 
 function dl(uri,fn){var a=document.createElement('a');a.href=uri;a.download=fn;a.target='_blank';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a)},500);}
+function _cleanName(fn){return String(fn||'').replace(/\.(xls|xlsx|xlsm|csv)$/i,'').replace(/[^A-Za-z0-9._-]+/g,'_').replace(/^_+|_+$/g,'');}
+function _srcTag(fn){var s=_cleanName(fn!=null?fn:F1);return s?'_'+s:'';}
 function cp(txt,lbl){try{navigator.clipboard.writeText(txt).then(function(){alert(lbl+' copied!')});}catch(e){var t=document.createElement('textarea');t.value=txt;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert(lbl+' copied!');}}
 function buildCSV(filtered){var h='Instrument\tISIN\tSector\tCountry\tRegion\tCurrency\tCB Price\tCoupon\tMaturity\tWeight %\tMV (USDm)\tDelta\tGamma\tVega\tRho\tSpread\tImpl. Vol.\tInput Vol.\tPremium %\tParity\tDuration\n';var ff=['_dn','ISIN','Sector','Country','Region','Bond Currency','Convertible Price','Coupon','Maturity','Index Weight','Market Cap (USDm)','Delta','Gamma','Vega','Rho (10bp)','Credit Spread','Implied Vol.','Input Vol.','Conversion Premium','Parity','Duration'];for(var i=0;i<filtered.length;i++){var d=filtered[i];var row=[];for(var j=0;j<ff.length;j++){var v=d[ff[j]];row.push(v==null?'':String(v));}h+=row.join('\t')+'\n';}return h;}
-function exportCSV(){var f=getFiltered();var csv='\uFEFF'+buildCSV(f).replace(/\t/g,';');dl('data:text/csv;charset=utf-8,'+encodeURIComponent(csv),'FTSE_CB_Export.csv');}
-function exportXLSX(){if(typeof XLSX==='undefined')return;var f=getFiltered();var h=['Instrument','ISIN','Sector','Country','Region','Currency','CB Price','Coupon','Maturity','Weight','MV USDm','Delta','Gamma','Vega','Rho','Spread','Impl Vol','Input Vol','Premium','Parity','Duration'];var ff=['_dn','ISIN','Sector','Country','Region','Bond Currency','Convertible Price','Coupon','Maturity','Index Weight','Market Cap (USDm)','Delta','Gamma','Vega','Rho (10bp)','Credit Spread','Implied Vol.','Input Vol.','Conversion Premium','Parity','Duration'];var rows=[h];for(var i=0;i<f.length;i++){var d=f[i];var r=[];for(var j=0;j<ff.length;j++)r.push(d[ff[j]]!=null?d[ff[j]]:'');rows.push(r);}var ws=XLSX.utils.aoa_to_sheet(rows);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Data');var b64=XLSX.write(wb,{bookType:'xlsx',type:'base64'});dl('data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+b64,'FTSE_CB.xlsx');}
+function exportCSV(){var f=getFiltered();var csv='\uFEFF'+buildCSV(f).replace(/\t/g,';');dl('data:text/csv;charset=utf-8,'+encodeURIComponent(csv),'FTSE_CB_Export'+_srcTag()+'.csv');}
+function exportXLSX(){if(typeof XLSX==='undefined')return;var f=getFiltered();var h=['Instrument','ISIN','Sector','Country','Region','Currency','CB Price','Coupon','Maturity','Weight','MV USDm','Delta','Gamma','Vega','Rho','Spread','Impl Vol','Input Vol','Premium','Parity','Duration'];var ff=['_dn','ISIN','Sector','Country','Region','Bond Currency','Convertible Price','Coupon','Maturity','Index Weight','Market Cap (USDm)','Delta','Gamma','Vega','Rho (10bp)','Credit Spread','Implied Vol.','Input Vol.','Conversion Premium','Parity','Duration'];var rows=[h];for(var i=0;i<f.length;i++){var d=f[i];var r=[];for(var j=0;j<ff.length;j++)r.push(d[ff[j]]!=null?d[ff[j]]:'');rows.push(r);}var ws=XLSX.utils.aoa_to_sheet(rows);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Data');var b64=XLSX.write(wb,{bookType:'xlsx',type:'base64'});dl('data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+b64,'FTSE_CB'+_srcTag()+'.xlsx');}
 function copyCSV(){cp(buildCSV(getFiltered()),'Data');}
 
 var wfC=null;
@@ -1161,7 +1163,7 @@ function setupCompSearch(){
   sug.addEventListener('mousedown',function(e){var it=e.target.closest('.ac-item');if(it){e.preventDefault();pick(it.getAttribute('data-name'));}});
   document.addEventListener('click',function(e){if(!e.target.closest('.ac-wrap'))closeSug();});
 }
-function exportCompCSV(){if(!window._compRows)return;var r=window._compRows;var c='\uFEFF'+'Instrument;Sector;Status;Price D2;Price D1;D Price;Weight D2;Weight D1;D Weight;D Delta;D Gamma;D Vega;D Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.ds!=null?x.ds.toFixed(0):''].join(';')+'\n';}dl('data:text/csv;charset=utf-8,'+encodeURIComponent(c),'FTSE_Comparison.csv');}
+function exportCompCSV(){if(!window._compRows)return;var r=window._compRows;var c='\uFEFF'+'Instrument;Sector;Status;Price D2;Price D1;D Price;Weight D2;Weight D1;D Weight;D Delta;D Gamma;D Vega;D Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.ds!=null?x.ds.toFixed(0):''].join(';')+'\n';}var _cmp=[_cleanName(F1),_cleanName(F2)].filter(Boolean).join('_vs_');dl('data:text/csv;charset=utf-8,'+encodeURIComponent(c),'FTSE_Comparison'+(_cmp?'_'+_cmp:'')+'.csv');}
 function copyCompCSV(){if(!window._compRows)return;var r=window._compRows;var c='Instrument\tSector\tStatus\tPrice D2\tPrice D1\tD Price\tWeight D2\tWeight D1\tD Weight\tD Delta\tD Gamma\tD Vega\tD Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.ds!=null?x.ds.toFixed(0):''].join('\t')+'\n';}cp(c,'Comparison');}
 
 
@@ -1378,7 +1380,7 @@ function exportWorkbook(){
   }
 
   var b64=XLSX.write(wb,{bookType:'xlsx',type:'base64'});
-  dl('data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+b64,'FTSE_CB_Dashboard.xlsx');
+  dl('data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+b64,'FTSE_CB_Dashboard'+_srcTag()+'.xlsx');
 }
 
 // Inject the per-chart buttons once the static layout is in the DOM.
