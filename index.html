@@ -900,6 +900,44 @@ function _cmpSets(){
   for(i=0;i<D2.length;i++){k=(D2[i].ISIN||'').toUpperCase();(k&&setA[k]?commonB:onlyB).push(D2[i]);}
   return{commonA:commonA,commonB:commonB,onlyA:onlyA,onlyB:onlyB};
 }
+// When the scatter is sparse (<=10 visible points), draw each CB's name next to
+// its bubble so you can read the constituents without hovering one by one.
+var SCATTER_LABEL_MAX=10;
+var scatterPermaLabels={
+  id:'scatterPermaLabels',
+  afterDatasetsDraw:function(chart){
+    var total=0;
+    for(var di=0;di<chart.data.datasets.length;di++){
+      var ds=chart.data.datasets[di];
+      if(ds.type==='line')continue;
+      if(!chart.isDatasetVisible(di))continue;
+      total+=ds.data.length;
+    }
+    if(total===0||total>SCATTER_LABEL_MAX)return;
+    var ctx=chart.ctx;ctx.save();
+    ctx.font='600 10px "DM Sans",sans-serif';ctx.textBaseline='middle';ctx.textAlign='left';
+    ctx.lineWidth=3;ctx.lineJoin='round';ctx.strokeStyle='rgba(10,14,23,0.85)';
+    for(var di=0;di<chart.data.datasets.length;di++){
+      var ds=chart.data.datasets[di];
+      if(ds.type==='line')continue;
+      if(!chart.isDatasetVisible(di))continue;
+      var meta=chart.getDatasetMeta(di);
+      var color=ds.borderColor||'#e2e8f0';
+      for(var i=0;i<meta.data.length;i++){
+        var pt=meta.data[i],raw=ds.data[i];
+        if(!pt||!raw||raw.label==null)continue;
+        var r=(pt.options&&pt.options.radius)||pt.radius||3;
+        var tx=pt.x+r+4,txt=raw.label;
+        // Flip the label to the left side if it would overflow the plot area.
+        var w=ctx.measureText(txt).width;
+        if(tx+w>chart.chartArea.right){ctx.textAlign='right';tx=pt.x-r-4;}else{ctx.textAlign='left';}
+        ctx.strokeText(txt,tx,pt.y);
+        ctx.fillStyle=color;ctx.fillText(txt,tx,pt.y);
+      }
+    }
+    ctx.restore();
+  }
+};
 function buildScatter(){
   var keys=['Spread','Dur','Delta','Price','Mat','Iss','Par','Prem','MV'],rd={};
   for(var ki=0;ki<keys.length;ki++){var k=keys[ki];var mn=document.getElementById('sf'+k+'Min'),mx=document.getElementById('sf'+k+'Max');rd[k]={a:+mn.value,b:+mx.value,fmin:+mn.min,fmax:+mx.max};}
@@ -1012,7 +1050,7 @@ function buildScatter(){
   }
   var ct=document.getElementById('scatterCount');if(ct)ct.textContent=countLabel;
   var c=document.getElementById('scatterChart');var existing=Chart.getChart(c);if(existing)existing.destroy();
-  new Chart(c,{type:'bubble',data:{datasets:sds},options:{responsive:true,maintainAspectRatio:false,
+  new Chart(c,{type:'bubble',data:{datasets:sds},plugins:[scatterPermaLabels],options:{responsive:true,maintainAspectRatio:false,
     onHover:function(evt,els){if(evt&&evt.native&&evt.native.target)evt.native.target.style.cursor=els.length?'pointer':'default';},
     onClick:function(evt,els,chart){if(!els.length)return;var el=els[0];var pt=chart.data.datasets[el.datasetIndex].data[el.index];if(pt&&pt._ref)window.open(cbPricerURL(pt._ref),'_blank','noopener');},
     scales:{x:Object.assign({title:{display:true,text:m.xL}},m.xMin!=null?{min:m.xMin,max:m.xMax}:{}),y:Object.assign({title:{display:true,text:m.yL}},m.yMin!=null?{min:m.yMin,max:m.yMax}:{})},
