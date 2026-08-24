@@ -1158,7 +1158,8 @@ function renderCompTable(){
     var dd=(a&&b)?(V(a.Delta)||0)-(V(b.Delta)||0):null;var dw=(a&&b)?(V(a['Index Weight'])||0)-(V(b['Index Weight'])||0):null;
     var dg=(a&&b)?(V(a.Gamma)||0)-(V(b.Gamma)||0):null;var dv=(a&&b)?(V(a.Vega)||0)-(V(b.Vega)||0):null;
     var ds=(a&&b)?(V(a['Credit Spread'])||0)-(V(b['Credit Spread'])||0):null;var dp=(a&&b)?(V(a['Convertible Price'])||0)-(V(b['Convertible Price'])||0):null;
-    rows.push({isin:isin,name:(a||b)._dn,sector:cur.Sector,status:status,w1:a?V(a['Index Weight']):null,w2:b?V(b['Index Weight']):null,p1:a?V(a['Convertible Price']):null,p2:b?V(b['Convertible Price']):null,dw:dw,dd:dd,dg:dg,dv:dv,ds:ds,dp:dp});
+    var div=(a&&b)?(V(a['Implied Vol.'])||0)-(V(b['Implied Vol.'])||0):null;
+    rows.push({isin:isin,name:(a||b)._dn,sector:cur.Sector,status:status,w1:a?V(a['Index Weight']):null,w2:b?V(b['Index Weight']):null,p1:a?V(a['Convertible Price']):null,p2:b?V(b['Convertible Price']):null,dw:dw,dd:dd,dg:dg,dv:dv,div:div,ds:ds,dp:dp});
   });
   rows.sort(function(a,b){if(a.status!==b.status){var o={'\ud83c\udd95 Entered':0,'\ud83d\udd34 Exited':1,'Common':2};return(o[a.status]||3)-(o[b.status]||3);}return Math.abs(b.dw||0)-Math.abs(a.dw||0);});
   window._compRows=rows;fillCompTable();setupCompSearch();
@@ -1169,9 +1170,9 @@ function fillCompTable(){
   var shown=q?rows.filter(function(r){return(r.name||'').toLowerCase().indexOf(q)>=0||(r.isin||'').toLowerCase().indexOf(q)>=0||(r.sector||'').toLowerCase().indexOf(q)>=0;}):rows;
   var cc=function(v){return v==null?'':v>0.001?'chg-up':v<-0.001?'chg-down':'chg-flat';};
   var cf=function(v,d){return v==null?'\u2014':(v>=0?'+':'')+v.toFixed(d);};
-  var h='<table class="data-table"><thead><tr><th>Instrument</th><th>Sector</th><th>Status</th><th>Price D2</th><th>Price D1</th><th>\u0394 Price</th><th>Weight D2</th><th>Weight D1</th><th>\u0394 Weight</th><th>\u0394 Delta</th><th>\u0394 Gamma</th><th>\u0394 Vega</th><th>\u0394 Spread</th></tr></thead><tbody>';
-  if(!shown.length)h+='<tr><td colspan="13" style="text-align:center;color:var(--text-dim);padding:1.2rem">No instruments match \u201c'+q+'\u201d</td></tr>';
-  for(var i=0;i<shown.length;i++){var r=shown[i];h+='<tr><td class="name-cell">'+r.name+'</td><td>'+(r.sector||'\u2014')+'</td><td>'+r.status+'</td><td>'+F$(r.p2,2)+'</td><td>'+F$(r.p1,2)+'</td><td class="'+cc(r.dp)+'">'+cf(r.dp,2)+'</td><td>'+F$(r.w2,3)+'</td><td>'+F$(r.w1,3)+'</td><td class="'+cc(r.dw)+'">'+cf(r.dw,3)+'</td><td class="'+cc(r.dd)+'">'+cf(r.dd,1)+'</td><td class="'+cc(r.dg)+'">'+cf(r.dg,3)+'</td><td class="'+cc(r.dv)+'">'+cf(r.dv,3)+'</td><td class="'+cc(r.ds)+'">'+cf(r.ds,0)+'</td></tr>';}
+  var h='<table class="data-table"><thead><tr><th>Instrument</th><th>Sector</th><th>Status</th><th>Price D2</th><th>Price D1</th><th>\u0394 Price</th><th>Weight D2</th><th>Weight D1</th><th>\u0394 Weight</th><th>\u0394 Delta</th><th>\u0394 Gamma</th><th>\u0394 Vega</th><th>\u0394 Impl. Vol.</th><th>\u0394 Spread</th></tr></thead><tbody>';
+  if(!shown.length)h+='<tr><td colspan="14" style="text-align:center;color:var(--text-dim);padding:1.2rem">No instruments match \u201c'+q+'\u201d</td></tr>';
+  for(var i=0;i<shown.length;i++){var r=shown[i];h+='<tr><td class="name-cell">'+r.name+'</td><td>'+(r.sector||'\u2014')+'</td><td>'+r.status+'</td><td>'+F$(r.p2,2)+'</td><td>'+F$(r.p1,2)+'</td><td class="'+cc(r.dp)+'">'+cf(r.dp,2)+'</td><td>'+F$(r.w2,3)+'</td><td>'+F$(r.w1,3)+'</td><td class="'+cc(r.dw)+'">'+cf(r.dw,3)+'</td><td class="'+cc(r.dd)+'">'+cf(r.dd,1)+'</td><td class="'+cc(r.dg)+'">'+cf(r.dg,3)+'</td><td class="'+cc(r.dv)+'">'+cf(r.dv,3)+'</td><td class="'+cc(r.div)+'">'+cf(r.div,2)+'</td><td class="'+cc(r.ds)+'">'+cf(r.ds,0)+'</td></tr>';}
   h+='</tbody></table>';document.getElementById('compTableWrap').innerHTML=h;
   var ct=document.getElementById('compCountTag');if(ct)ct.textContent=q?shown.length+' / '+rows.length:rows.length+' instruments';
 }
@@ -1208,8 +1209,8 @@ function setupCompSearch(){
   sug.addEventListener('mousedown',function(e){var it=e.target.closest('.ac-item');if(it){e.preventDefault();pick(it.getAttribute('data-name'));}});
   document.addEventListener('click',function(e){if(!e.target.closest('.ac-wrap'))closeSug();});
 }
-function exportCompCSV(){if(!window._compRows)return;var r=window._compRows;var c='\uFEFF'+'Instrument;Sector;Status;Price D2;Price D1;D Price;Weight D2;Weight D1;D Weight;D Delta;D Gamma;D Vega;D Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.ds!=null?x.ds.toFixed(0):''].join(';')+'\n';}var _cmp=[_cleanName(F1),_cleanName(F2)].filter(Boolean).join('_vs_');dl('data:text/csv;charset=utf-8,'+encodeURIComponent(c),'FTSE_Comparison'+(_cmp?'_'+_cmp:'')+'.csv');}
-function copyCompCSV(){if(!window._compRows)return;var r=window._compRows;var c='Instrument\tSector\tStatus\tPrice D2\tPrice D1\tD Price\tWeight D2\tWeight D1\tD Weight\tD Delta\tD Gamma\tD Vega\tD Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.ds!=null?x.ds.toFixed(0):''].join('\t')+'\n';}cp(c,'Comparison');}
+function exportCompCSV(){if(!window._compRows)return;var r=window._compRows;var c='\uFEFF'+'Instrument;Sector;Status;Price D2;Price D1;D Price;Weight D2;Weight D1;D Weight;D Delta;D Gamma;D Vega;D Impl Vol;D Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.div!=null?x.div.toFixed(2):'',x.ds!=null?x.ds.toFixed(0):''].join(';')+'\n';}var _cmp=[_cleanName(F1),_cleanName(F2)].filter(Boolean).join('_vs_');dl('data:text/csv;charset=utf-8,'+encodeURIComponent(c),'FTSE_Comparison'+(_cmp?'_'+_cmp:'')+'.csv');}
+function copyCompCSV(){if(!window._compRows)return;var r=window._compRows;var c='Instrument\tSector\tStatus\tPrice D2\tPrice D1\tD Price\tWeight D2\tWeight D1\tD Weight\tD Delta\tD Gamma\tD Vega\tD Impl Vol\tD Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.div!=null?x.div.toFixed(2):'',x.ds!=null?x.ds.toFixed(0):''].join('\t')+'\n';}cp(c,'Comparison');}
 
 
 
@@ -1422,8 +1423,8 @@ function exportWorkbook(){
   // Sheet 6 — comparison (only if a comparison file was loaded)
   if(window._compRows&&window._compRows.length){
     var cr=window._compRows;
-    var ch2=[['Instrument','Sector','Status','Price D2','Price D1','Δ Price','Weight D2','Weight D1','Δ Weight','Δ Delta','Δ Gamma','Δ Vega','Δ Spread']];
-    for(var k=0;k<cr.length;k++){var x=cr[k];ch2.push([x.name,x.sector||'',x.status,x.p2,x.p1,x.dp,x.w2,x.w1,x.dw,x.dd,x.dg,x.dv,x.ds]);}
+    var ch2=[['Instrument','Sector','Status','Price D2','Price D1','Δ Price','Weight D2','Weight D1','Δ Weight','Δ Delta','Δ Gamma','Δ Vega','Δ Impl. Vol.','Δ Spread']];
+    for(var k=0;k<cr.length;k++){var x=cr[k];ch2.push([x.name,x.sector||'',x.status,x.p2,x.p1,x.dp,x.w2,x.w1,x.dw,x.dd,x.dg,x.dv,x.div,x.ds]);}
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(ch2),'Comparison');
   }
 
