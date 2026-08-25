@@ -1162,7 +1162,30 @@ function renderCompTable(){
     rows.push({isin:isin,name:(a||b)._dn,sector:cur.Sector,status:status,w1:a?V(a['Index Weight']):null,w2:b?V(b['Index Weight']):null,p1:a?V(a['Convertible Price']):null,p2:b?V(b['Convertible Price']):null,dw:dw,dd:dd,dg:dg,dv:dv,div:div,ds:ds,dp:dp});
   });
   rows.sort(function(a,b){if(a.status!==b.status){var o={'\ud83c\udd95 Entered':0,'\ud83d\udd34 Exited':1,'Common':2};return(o[a.status]||3)-(o[b.status]||3);}return Math.abs(b.dw||0)-Math.abs(a.dw||0);});
-  window._compRows=rows;fillCompTable();setupCompSearch();
+  window._compRows=rows;fillCompTable();setupCompSearch();setupCompSort();
+}
+var COMP_COLS=[{k:'name',l:'Instrument'},{k:'sector',l:'Sector'},{k:'status',l:'Status'},{k:'p2',l:'Price D2'},{k:'p1',l:'Price D1'},{k:'dp',l:'\u0394 Price'},{k:'w2',l:'Weight D2'},{k:'w1',l:'Weight D1'},{k:'dw',l:'\u0394 Weight'},{k:'dd',l:'\u0394 Delta'},{k:'dg',l:'\u0394 Gamma'},{k:'dv',l:'\u0394 Vega'},{k:'div',l:'\u0394 Impl. Vol.'},{k:'ds',l:'\u0394 Spread'}];
+var COMP_NUM={p2:1,p1:1,dp:1,w2:1,w1:1,dw:1,dd:1,dg:1,dv:1,div:1,ds:1};
+var compSortCol=null,compSortAsc=false;
+function compSortRows(rows){
+  if(!compSortCol)return rows;
+  var c=compSortCol,asc=compSortAsc,num=COMP_NUM[c];
+  return rows.slice().sort(function(a,b){
+    var va=a[c],vb=b[c];
+    if(num){if(va==null&&vb==null)return 0;if(va==null)return 1;if(vb==null)return -1;return asc?va-vb:vb-va;}
+    return asc?String(va||'').localeCompare(String(vb||'')):String(vb||'').localeCompare(String(va||''));
+  });
+}
+function setupCompSort(){
+  if(setupCompSort._wired)return;setupCompSort._wired=true;
+  document.getElementById('compTableWrap').addEventListener('click',function(e){
+    var th=e.target.closest('th[data-sort]');if(!th)return;
+    var c=th.getAttribute('data-sort');
+    if(compSortCol!==c){compSortCol=c;compSortAsc=false;}
+    else if(!compSortAsc){compSortAsc=true;}
+    else{compSortCol=null;compSortAsc=false;}
+    fillCompTable();
+  });
 }
 function fillCompTable(){
   var rows=window._compRows||[];
@@ -1170,7 +1193,10 @@ function fillCompTable(){
   var shown=q?rows.filter(function(r){return(r.name||'').toLowerCase().indexOf(q)>=0||(r.isin||'').toLowerCase().indexOf(q)>=0||(r.sector||'').toLowerCase().indexOf(q)>=0;}):rows;
   var cc=function(v){return v==null?'':v>0.001?'chg-up':v<-0.001?'chg-down':'chg-flat';};
   var cf=function(v,d){return v==null?'\u2014':(v>=0?'+':'')+v.toFixed(d);};
-  var h='<table class="data-table"><thead><tr><th>Instrument</th><th>Sector</th><th>Status</th><th>Price D2</th><th>Price D1</th><th>\u0394 Price</th><th>Weight D2</th><th>Weight D1</th><th>\u0394 Weight</th><th>\u0394 Delta</th><th>\u0394 Gamma</th><th>\u0394 Vega</th><th>\u0394 Impl. Vol.</th><th>\u0394 Spread</th></tr></thead><tbody>';
+  shown=compSortRows(shown);
+  var h='<table class="data-table"><thead><tr>';
+  for(var ci=0;ci<COMP_COLS.length;ci++){var col=COMP_COLS[ci];var scls=compSortCol===col.k?(compSortAsc?' class="sorted-asc"':' class="sorted-desc"'):'';h+='<th data-sort="'+col.k+'"'+scls+'>'+col.l+'</th>';}
+  h+='</tr></thead><tbody>';
   if(!shown.length)h+='<tr><td colspan="14" style="text-align:center;color:var(--text-dim);padding:1.2rem">No instruments match \u201c'+q+'\u201d</td></tr>';
   for(var i=0;i<shown.length;i++){var r=shown[i];h+='<tr><td class="name-cell">'+r.name+'</td><td>'+(r.sector||'\u2014')+'</td><td>'+r.status+'</td><td>'+F$(r.p2,2)+'</td><td>'+F$(r.p1,2)+'</td><td class="'+cc(r.dp)+'">'+cf(r.dp,2)+'</td><td>'+F$(r.w2,3)+'</td><td>'+F$(r.w1,3)+'</td><td class="'+cc(r.dw)+'">'+cf(r.dw,3)+'</td><td class="'+cc(r.dd)+'">'+cf(r.dd,1)+'</td><td class="'+cc(r.dg)+'">'+cf(r.dg,3)+'</td><td class="'+cc(r.dv)+'">'+cf(r.dv,3)+'</td><td class="'+cc(r.div)+'">'+cf(r.div,2)+'</td><td class="'+cc(r.ds)+'">'+cf(r.ds,0)+'</td></tr>';}
   h+='</tbody></table>';document.getElementById('compTableWrap').innerHTML=h;
