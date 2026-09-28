@@ -498,13 +498,13 @@ function launchDashboard(){
 
 function renderKPIs(D){
   var n=D.length;var volW=wAvg(D,'Implied Vol.');var volS=0,volC=0;for(var i=0;i<D.length;i++){var v=V(D[i]['Implied Vol.']);if(v!=null){volS+=v;volC++;}}var volA=volC>0?volS/volC:null;
-  var ytmSv=0,ytmSw=0,ytmPos=0,edgeSv=0,edgeSw=0;
+  var ytmSv=0,ytmSw=0,ytmPos=0,edgeSv=0,edgeSw=0,mvTot=0;
   for(var i=0;i<D.length;i++){var d=D[i];var y=V(d['Yield to Mat/Put']),mc=V(d['Market Cap (USDm)'])||0,e=V(d['Edge to Theo.']),iw=V(d['Index Weight'])||0;
-    if(y!=null&&mc>0){ytmSv+=y*mc;ytmSw+=mc;}
+    mvTot+=mc;if(y!=null&&mc>0){ytmSv+=y*mc;ytmSw+=mc;}
     if(y!=null&&y>0)ytmPos++;
     if(e!=null&&iw>0){edgeSv+=e*iw;edgeSw+=iw;}}
   var ytmMC=ytmSw>0?ytmSv/ytmSw:null,edgeW=edgeSw>0?edgeSv/edgeSw:null;
-  var kpis=[{l:'Instruments',v:n,c:'accent'},{l:'Wtd. Delta',v:F$(wAvg(D,'Delta'),2),c:'green'},{l:'Wtd. Gamma',v:F$(wAvg(D,'Gamma'),4),c:'orange'},{l:'Wtd. Vega',v:F$(wAvg(D,'Vega'),4),c:'cyan'},{l:'Rho (10bp)',v:F$(wAvg(D,'Rho (10bp)'),4),c:'pink'},{l:'Spread (bps)',v:F$(wAvg(D,'Credit Spread'),0),c:''},{l:'Duration',v:F$(wAvg(D,'Duration'),2),c:''},{l:'Wtd. Impl. Vol.',v:volW!=null?volW.toFixed(1)+'%':'—',c:'accent'},{l:'Avg. Impl. Vol.',v:volA!=null?volA.toFixed(1)+'%':'—',c:''},{l:'Wtd. YTM (MV)',v:ytmMC!=null?ytmMC.toFixed(2)+'%':'—',c:'accent'},{l:'# YTM > 0',v:ytmPos,c:'green'},{l:'Wtd. Edge to Theo.',v:F$(edgeW,2),c:'orange'}];
+  var kpis=[{l:'Instruments',v:n,c:'accent'},{l:'Total MV',v:mvTot>=1000?(mvTot/1000).toFixed(2)+' USDbn':mvTot.toFixed(0)+' USDm',c:'green'},{l:'Wtd. Delta',v:F$(wAvg(D,'Delta'),2),c:'green'},{l:'Wtd. Gamma',v:F$(wAvg(D,'Gamma'),4),c:'orange'},{l:'Wtd. Vega',v:F$(wAvg(D,'Vega'),4),c:'cyan'},{l:'Rho (10bp)',v:F$(wAvg(D,'Rho (10bp)'),4),c:'pink'},{l:'Spread (bps)',v:F$(wAvg(D,'Credit Spread'),0),c:''},{l:'Duration',v:F$(wAvg(D,'Duration'),2),c:''},{l:'Wtd. Impl. Vol.',v:volW!=null?volW.toFixed(1)+'%':'—',c:'accent'},{l:'Avg. Impl. Vol.',v:volA!=null?volA.toFixed(1)+'%':'—',c:''},{l:'Wtd. YTM (MV)',v:ytmMC!=null?ytmMC.toFixed(2)+'%':'—',c:'accent'},{l:'# YTM > 0',v:ytmPos,c:'green'},{l:'Wtd. Edge to Theo.',v:F$(edgeW,2),c:'orange'}];
   window._kpiRows=kpis.map(function(k){return[k.l,k.v];});
   var kh='';for(var i=0;i<kpis.length;i++){var k=kpis[i];kh+='<div class="kpi"><div class="label">'+k.l+'</div><div class="value '+k.c+' mono">'+k.v+'</div></div>';}
   document.getElementById('kpiStrip').innerHTML=kh;
