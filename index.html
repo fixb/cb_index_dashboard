@@ -44,6 +44,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .kpi{background:var(--surface);padding:0.85rem 1.25rem;text-align:center}
 .kpi .label{font-size:0.6rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:0.3rem}
 .kpi .value{font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:600}
+.kpi .sub{font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--text-dim);margin-top:0.2rem}
 .kpi .value.accent{color:var(--accent)}.kpi .value.green{color:var(--green)}.kpi .value.orange{color:var(--orange)}.kpi .value.cyan{color:var(--cyan)}.kpi .value.pink{color:var(--pink)}
 .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);padding:0 2rem;background:var(--surface);overflow-x:auto}
 .tab{padding:0.7rem 1.2rem;font-size:0.78rem;font-weight:500;color:var(--text-dim);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;user-select:none}
@@ -503,10 +504,11 @@ function renderKPIs(D){
     mvTot+=mc;if(y!=null&&mc>0){ytmSv+=y*mc;ytmSw+=mc;}
     if(y!=null&&y>0)ytmPos++;
     if(e!=null&&iw>0){edgeSv+=e*iw;edgeSw+=iw;}}
+  var mvAll=0;for(var i=0;i<D1.length;i++)mvAll+=V(D1[i]['Market Cap (USDm)'])||0;var mvPct=mvAll>0?(mvTot/mvAll*100).toFixed(1)+'% of total':null;
   var ytmMC=ytmSw>0?ytmSv/ytmSw:null,edgeW=edgeSw>0?edgeSv/edgeSw:null;
-  var kpis=[{l:'Instruments',v:n,c:'accent'},{l:'Total MV',v:mvTot>=1000?(mvTot/1000).toFixed(2)+' USDbn':mvTot.toFixed(0)+' USDm',c:'green'},{l:'Wtd. Delta',v:F$(wAvg(D,'Delta'),2),c:'green'},{l:'Wtd. Gamma',v:F$(wAvg(D,'Gamma'),4),c:'orange'},{l:'Wtd. Vega',v:F$(wAvg(D,'Vega'),4),c:'cyan'},{l:'Rho (10bp)',v:F$(wAvg(D,'Rho (10bp)'),4),c:'pink'},{l:'Spread (bps)',v:F$(wAvg(D,'Credit Spread'),0),c:''},{l:'Duration',v:F$(wAvg(D,'Duration'),2),c:''},{l:'Wtd. Impl. Vol.',v:volW!=null?volW.toFixed(1)+'%':'—',c:'accent'},{l:'Avg. Impl. Vol.',v:volA!=null?volA.toFixed(1)+'%':'—',c:''},{l:'Wtd. YTM (MV)',v:ytmMC!=null?ytmMC.toFixed(2)+'%':'—',c:'accent'},{l:'# YTM > 0',v:ytmPos,c:'green'},{l:'Wtd. Edge to Theo.',v:F$(edgeW,2),c:'orange'}];
-  window._kpiRows=kpis.map(function(k){return[k.l,k.v];});
-  var kh='';for(var i=0;i<kpis.length;i++){var k=kpis[i];kh+='<div class="kpi"><div class="label">'+k.l+'</div><div class="value '+k.c+' mono">'+k.v+'</div></div>';}
+  var kpis=[{l:'Instruments',v:n,c:'accent'},{l:'Total MV',v:mvTot>=1000?(mvTot/1000).toFixed(2)+' USDbn':mvTot.toFixed(0)+' USDm',c:'green',s:mvPct},{l:'Wtd. Delta',v:F$(wAvg(D,'Delta'),2),c:'green'},{l:'Wtd. Gamma',v:F$(wAvg(D,'Gamma'),4),c:'orange'},{l:'Wtd. Vega',v:F$(wAvg(D,'Vega'),4),c:'cyan'},{l:'Rho (10bp)',v:F$(wAvg(D,'Rho (10bp)'),4),c:'pink'},{l:'Spread (bps)',v:F$(wAvg(D,'Credit Spread'),0),c:''},{l:'Duration',v:F$(wAvg(D,'Duration'),2),c:''},{l:'Wtd. Impl. Vol.',v:volW!=null?volW.toFixed(1)+'%':'—',c:'accent'},{l:'Avg. Impl. Vol.',v:volA!=null?volA.toFixed(1)+'%':'—',c:''},{l:'Wtd. YTM (MV)',v:ytmMC!=null?ytmMC.toFixed(2)+'%':'—',c:'accent'},{l:'# YTM > 0',v:ytmPos,c:'green'},{l:'Wtd. Edge to Theo.',v:F$(edgeW,2),c:'orange'}];
+  window._kpiRows=kpis.map(function(k){return[k.l,k.v];});if(mvPct)window._kpiRows.splice(2,0,['Total MV (% of total)',mvPct.replace(' of total','')]);
+  var kh='';for(var i=0;i<kpis.length;i++){var k=kpis[i];kh+='<div class="kpi"><div class="label">'+k.l+'</div><div class="value '+k.c+' mono">'+k.v+'</div>'+(k.s?'<div class="sub">'+k.s+'</div>':'')+'</div>';}
   document.getElementById('kpiStrip').innerHTML=kh;
 }
 function buildDashboard(){
