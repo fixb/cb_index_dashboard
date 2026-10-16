@@ -489,6 +489,9 @@ function launchDashboard(){
   document.getElementById('chipLabel1').textContent=F1+' ('+D1.length+')';
   if(D2){for(var i=0;i<D2.length;i++){var _dv2=V(D2[i].Duration);if(_dv2!=null&&_dv2>30)D2[i].Duration=30;}document.getElementById('chip2').style.display='';document.getElementById('chipLabel2').textContent=F2+' ('+D2.length+')';document.getElementById('tabCompare').style.display='';var cl=document.getElementById('sfCmpLabel');var cd=document.getElementById('sfCmp');if(cl)cl.style.display='';if(cd)cd.style.display='flex';_updateCmpLabels();}
   else{var c2=document.getElementById('chip2');if(c2)c2.style.display='none';var tc=document.getElementById('tabCompare');if(tc)tc.style.display='none';var cl=document.getElementById('sfCmpLabel');var cd=document.getElementById('sfCmp');if(cl)cl.style.display='none';if(cd)cd.style.display='none';}
+  // Default the Compare mode to overlay both files when a second file is loaded (Lorenz, histograms, scatter).
+  compareMode=D2?'Both':'D1';
+  var _cb=document.querySelectorAll('#sfCmp .btn');for(var i=0;i<_cb.length;i++)_cb[i].classList.toggle('btn-accent',_cb[i].getAttribute('data-cmp')===compareMode);
   // Reset to overview tab
   var tabs=document.querySelectorAll('.tab');for(var i=0;i<tabs.length;i++)tabs[i].classList.remove('active');
   var panels=document.querySelectorAll('.panel');for(var i=0;i<panels.length;i++)panels[i].classList.remove('active');
