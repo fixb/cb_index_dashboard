@@ -291,7 +291,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         </ul></div>
       </div></div>
     </div>
-    <div class="panel" id="panel-compare"><div id="compUploadArea" style="border:2px dashed #334155;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;margin-bottom:1.5rem;transition:all 0.3s"><div style="font-size:1.5rem;margin-bottom:0.5rem">📈</div><div style="font-size:0.9rem;font-weight:600;color:#e2e8f0">Load a comparison file</div><div style="font-size:0.7rem;color:#64748b;margin-top:0.3rem">.xls / .xlsx — drag or click</div></div><div class="comp-summary" id="compSummary"></div><div class="card"><div class="card-header"><h3>Waterfall — Greeks change by sector</h3><div class="btn-group" id="compMetricBtns"><button class="btn btn-accent active" data-m="Delta" onclick="switchWF('Delta')">Delta</button><button class="btn" data-m="Gamma" onclick="switchWF('Gamma')">Gamma</button><button class="btn" data-m="Vega" onclick="switchWF('Vega')">Vega</button><button class="btn" data-m="Rho (10bp)" onclick="switchWF('Rho (10bp)')">Rho</button><button class="btn" data-m="Credit Spread" onclick="switchWF('Credit Spread')">Spread</button><button class="btn" data-m="Implied Vol." onclick="switchWF('Implied Vol.')">Impl. Vol.</button></div></div><div class="card-body"><div class="chart-wrap" style="height:360px"><canvas id="wfChart"></canvas></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Δ Weight by sector</h3></div><div class="card-body"><div class="chart-wrap" style="height:320px"><canvas id="wfWeightSec"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Δ Weight by region</h3></div><div class="card-body"><div class="chart-wrap" style="height:320px"><canvas id="wfWeightReg"></canvas></div></div></div></div><div class="card"><div class="card-header"><h3>Change details</h3><div class="btn-group"><button class="btn btn-accent" onclick="exportCompCSV()">⬇ CSV</button><button class="btn" onclick="copyCompCSV()">📋 Copy</button></div></div><div class="card-body"><div class="filter-bar"><div class="ac-wrap"><input type="text" id="compSearch" placeholder="Search instrument / ISIN / sector…" autocomplete="off"><div class="ac-list" id="compSuggest"></div></div><span class="tag" id="compCountTag"></span></div><div class="scroll-x scroll-y-table" id="compTableWrap"></div></div></div></div>
+    <div class="panel" id="panel-compare"><div id="compUploadArea" style="border:2px dashed #334155;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;margin-bottom:1.5rem;transition:all 0.3s"><div style="font-size:1.5rem;margin-bottom:0.5rem">📈</div><div style="font-size:0.9rem;font-weight:600;color:#e2e8f0">Load a comparison file</div><div style="font-size:0.7rem;color:#64748b;margin-top:0.3rem">.xls / .xlsx — drag or click</div></div><div class="card" id="compFilterCard" style="display:none"><div class="card-header"><h3>Filters</h3><span class="tag tag-green" id="compFiltTag"></span></div><div class="card-body"><div class="filter-bar" style="margin-bottom:0"><select id="cfRegion" data-k="Region"></select><select id="cfCountry" data-k="Country"></select><select id="cfSector" data-k="Sector"></select><select id="cfCcy" data-k="Bond Currency"></select><select id="cfStatus"><option value="">All statuses</option><option value="Common">Common</option><option value="🆕 Entered">🆕 Entered</option><option value="🔴 Exited">🔴 Exited</option></select><button class="btn" id="cfReset">↻ Reset</button></div></div></div><div class="comp-summary" id="compSummary"></div><div class="card"><div class="card-header"><h3>Waterfall — Greeks change by sector</h3><div class="btn-group" id="compMetricBtns"><button class="btn btn-accent active" data-m="Delta" onclick="switchWF('Delta')">Delta</button><button class="btn" data-m="Gamma" onclick="switchWF('Gamma')">Gamma</button><button class="btn" data-m="Vega" onclick="switchWF('Vega')">Vega</button><button class="btn" data-m="Rho (10bp)" onclick="switchWF('Rho (10bp)')">Rho</button><button class="btn" data-m="Credit Spread" onclick="switchWF('Credit Spread')">Spread</button><button class="btn" data-m="Implied Vol." onclick="switchWF('Implied Vol.')">Impl. Vol.</button></div></div><div class="card-body"><div class="chart-wrap" style="height:360px"><canvas id="wfChart"></canvas></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Δ Weight by sector</h3></div><div class="card-body"><div class="chart-wrap" style="height:320px"><canvas id="wfWeightSec"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Δ Weight by region</h3></div><div class="card-body"><div class="chart-wrap" style="height:320px"><canvas id="wfWeightReg"></canvas></div></div></div></div><div class="card"><div class="card-header"><h3>Change details</h3><div class="btn-group"><button class="btn btn-accent" onclick="exportCompCSV()">⬇ CSV</button><button class="btn" onclick="copyCompCSV()">📋 Copy</button></div></div><div class="card-body"><div class="filter-bar"><div class="ac-wrap"><input type="text" id="compSearch" placeholder="Search instrument / ISIN / sector…" autocomplete="off"><div class="ac-list" id="compSuggest"></div></div><span class="tag" id="compCountTag"></span></div><div class="scroll-x scroll-y-table" id="compTableWrap"></div></div></div></div>
   </div>
 </div>
 
@@ -1125,21 +1125,44 @@ function exportXLSX(){if(typeof XLSX==='undefined')return;var f=getFiltered();va
 function copyCSV(){cp(buildCSV(getFiltered()),'Data');}
 
 var wfC=null;
+var CF_SEL=[{id:'cfRegion',k:'Region',all:'All regions'},{id:'cfCountry',k:'Country',all:'All countries'},{id:'cfSector',k:'Sector',all:'All sectors'},{id:'cfCcy',k:'Bond Currency',all:'All currencies'}];
+var cD1=[],cD2=[];
+function compFiltActive(){for(var i=0;i<CF_SEL.length;i++)if(document.getElementById(CF_SEL[i].id).value)return true;return false;}
+function compSub(D,skipKey){var f=[];for(var i=0;i<CF_SEL.length;i++){if(CF_SEL[i].k===skipKey)continue;var v=document.getElementById(CF_SEL[i].id).value;if(v)f.push([CF_SEL[i].k,v]);}
+  if(!f.length)return D;return D.filter(function(d){for(var j=0;j<f.length;j++)if((d[f[j][0]]||'')!==f[j][1])return false;return true;});}
+function initCompFilters(){
+  document.getElementById('compFilterCard').style.display='';
+  // Options of each select are narrowed by the other active filters (e.g. countries of the chosen region)
+  for(var i=0;i<CF_SEL.length;i++){var c=CF_SEL[i],el=document.getElementById(c.id),cur=el.value,set={};
+    var a=compSub(D1,c.k),b=compSub(D2,c.k);for(var j=0;j<a.length;j++)if(a[j][c.k])set[a[j][c.k]]=1;for(var j=0;j<b.length;j++)if(b[j][c.k])set[b[j][c.k]]=1;
+    var vals=Object.keys(set).sort(),h='<option value="">'+c.all+'</option>';
+    for(var j=0;j<vals.length;j++)h+='<option value="'+vals[j]+'"'+(vals[j]===cur?' selected':'')+'>'+vals[j]+'</option>';
+    el.innerHTML=h;if(cur&&!set[cur])el.value='';}
+  if(initCompFilters._wired)return;initCompFilters._wired=true;
+  for(var i=0;i<CF_SEL.length;i++)document.getElementById(CF_SEL[i].id).addEventListener('change',buildComparison);
+  document.getElementById('cfStatus').addEventListener('change',fillCompTable);
+  document.getElementById('cfReset').addEventListener('click',function(){for(var i=0;i<CF_SEL.length;i++)document.getElementById(CF_SEL[i].id).value='';document.getElementById('cfStatus').value='';buildComparison();});
+}
+function sumW(D){var s=0;for(var i=0;i<D.length;i++)s+=V(D[i]['Index Weight'])||0;return s;}
 function buildComparison(){
+  initCompFilters();
+  cD1=compSub(D1);cD2=compSub(D2);var filt=compFiltActive();
+  var ft=document.getElementById('compFiltTag');ft.textContent=filt?'D1 '+cD1.length+' \u00b7 D2 '+cD2.length+' instruments':'';
   var ms=[{l:'Instruments',fn:function(d){return d.length},d:0},{l:'Delta',fn:function(d){return wAvg(d,'Delta')},d:2},{l:'Gamma',fn:function(d){return wAvg(d,'Gamma')},d:4},{l:'Vega',fn:function(d){return wAvg(d,'Vega')},d:4},{l:'Rho',fn:function(d){return wAvg(d,'Rho (10bp)')},d:4},{l:'Spread',fn:function(d){return wAvg(d,'Credit Spread')},d:0},{l:'Impl. Vol.',fn:function(d){return wAvg(d,'Implied Vol.')},d:1}];
-  var sh='';for(var i=0;i<ms.length;i++){var m=ms[i];var v1=m.fn(D1),v2=m.fn(D2);var diff=(v1!=null&&v2!=null)?v1-v2:null;var cls=diff==null?'chg-flat':diff>0.0001?'chg-up':diff<-0.0001?'chg-down':'chg-flat';var sign=diff>0?'+':'';sh+='<div class="comp-card"><div class="comp-label">'+m.l+'</div><div class="comp-values"><span class="comp-old">'+F$(v2,m.d)+'</span><span class="comp-arrow">\u2192</span><span class="comp-new">'+F$(v1,m.d)+'</span></div><div class="comp-chg '+cls+'">'+(diff!=null?sign+F$(diff,m.d):'\u2014')+'</div></div>';}
+  if(filt)ms.splice(1,0,{l:'Index weight %',fn:sumW,d:2});
+  var sh='';for(var i=0;i<ms.length;i++){var m=ms[i];var v1=m.fn(cD1),v2=m.fn(cD2);var diff=(v1!=null&&v2!=null)?v1-v2:null;var cls=diff==null?'chg-flat':diff>0.0001?'chg-up':diff<-0.0001?'chg-down':'chg-flat';var sign=diff>0?'+':'';sh+='<div class="comp-card"><div class="comp-label">'+m.l+'</div><div class="comp-values"><span class="comp-old">'+F$(v2,m.d)+'</span><span class="comp-arrow">\u2192</span><span class="comp-new">'+F$(v1,m.d)+'</span></div><div class="comp-chg '+cls+'">'+(diff!=null?sign+F$(diff,m.d):'\u2014')+'</div></div>';}
   document.getElementById('compSummary').innerHTML=sh;
-  renderWF('Delta');renderBarD('wfWeightSec',D1,D2,'Sector');renderBarD('wfWeightReg',D1,D2,'Region');renderCompTable();
+  var am=document.querySelector('#compMetricBtns .btn.active');renderWF(am?am.getAttribute('data-m'):'Delta');renderBarD('wfWeightSec',cD1,cD2,'Sector');renderBarD('wfWeightReg',cD1,cD2,'Region');renderCompTable();
 }
 function switchWF(m){var btns=document.querySelectorAll('#compMetricBtns .btn');for(var i=0;i<btns.length;i++){btns[i].classList.toggle('btn-accent',btns[i].getAttribute('data-m')===m);btns[i].classList.toggle('active',btns[i].getAttribute('data-m')===m);}renderWF(m);}
 function renderWF(metric){
   if(wfC)wfC.destroy();
-  var s1=grp(D1,'Sector',[metric]),s2=grp(D2,'Sector',[metric]);
+  var s1=grp(cD1,'Sector',[metric]),s2=grp(cD2,'Sector',[metric]);var tw1=sumW(cD1)||100,tw2=sumW(cD2)||100;
   var allSet={};for(var i=0;i<s1.length;i++)allSet[s1[i].name]=1;for(var i=0;i<s2.length;i++)allSet[s2[i].name]=1;var all=Object.keys(allSet).sort();
   var m1={},m2={};for(var i=0;i<s1.length;i++)m1[s1[i].name]=s1[i];for(var i=0;i<s2.length;i++)m2[s2[i].name]=s2[i];
-  var changes=[];for(var i=0;i<all.length;i++){var sec=all[i];var a=m1[sec],b=m2[sec];var c1=a?(a['w_'+metric]||0)*a.weight/100:0;var c2=b?(b['w_'+metric]||0)*b.weight/100:0;var ch=c1-c2;if(Math.abs(ch)>0.0001)changes.push({name:sec,change:ch});}
+  var changes=[];for(var i=0;i<all.length;i++){var sec=all[i];var a=m1[sec],b=m2[sec];var c1=a?(a['w_'+metric]||0)*a.weight/tw1:0;var c2=b?(b['w_'+metric]||0)*b.weight/tw2:0;var ch=c1-c2;if(Math.abs(ch)>0.0001)changes.push({name:sec,change:ch});}
   changes.sort(function(a,b){return b.change-a.change});
-  var tOld=wAvg(D2,metric)||0,tNew=wAvg(D1,metric)||0;
+  var tOld=wAvg(cD2,metric)||0,tNew=wAvg(cD1,metric)||0;
   var labels=['D2 ('+F$(tOld,2)+')'];for(var i=0;i<changes.length;i++)labels.push(changes[i].name);labels.push('D1 ('+F$(tNew,2)+')');
   var bases=[0],values=[tOld],bg=['rgba(96,165,250,0.7)'],bc=['#60a5fa'];var run=tOld;
   for(var i=0;i<changes.length;i++){var c=changes[i];bases.push(c.change>=0?run:run+c.change);values.push(Math.abs(c.change));run+=c.change;bg.push(c.change>=0?'rgba(52,211,153,0.7)':'rgba(248,113,113,0.7)');bc.push(c.change>=0?'#34d399':'#f87171');}
@@ -1152,11 +1175,12 @@ function renderBarD(canvasId,data1,data2,key){
   var m1={},m2={};for(var i=0;i<g1.length;i++)m1[g1[i].name]=g1[i].weight;for(var i=0;i<g2.length;i++)m2[g2[i].name]=g2[i].weight;
   var changes=[];for(var i=0;i<all.length;i++){var c=(m1[all[i]]||0)-(m2[all[i]]||0);if(Math.abs(c)>0.005)changes.push({name:all[i],change:c});}
   changes.sort(function(a,b){return b.change-a.change});
+  var _old=Chart.getChart(document.getElementById(canvasId));if(_old)_old.destroy();
   new Chart(document.getElementById(canvasId),{type:'bar',data:{labels:changes.map(function(c){return c.name}),datasets:[{data:changes.map(function(c){return+c.change.toFixed(3)}),backgroundColor:changes.map(function(c){return c.change>=0?'rgba(52,211,153,0.7)':'rgba(248,113,113,0.7)'}),borderColor:changes.map(function(c){return c.change>=0?'#34d399':'#f87171'}),borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{title:{display:true,text:'\u0394 Weight (%)'}}},plugins:{legend:{display:false}}}});
 }
 function renderCompTable(){
-  var m1=new Map();for(var i=0;i<D1.length;i++)m1.set(D1[i].ISIN,D1[i]);
-  var m2=new Map();for(var i=0;i<D2.length;i++)m2.set(D2[i].ISIN,D2[i]);
+  var m1=new Map();for(var i=0;i<cD1.length;i++)m1.set(cD1[i].ISIN,cD1[i]);
+  var m2=new Map();for(var i=0;i<cD2.length;i++)m2.set(cD2[i].ISIN,cD2[i]);
   var allKeys=new Set();m1.forEach(function(v,k){allKeys.add(k)});m2.forEach(function(v,k){allKeys.add(k)});
   var rows=[];allKeys.forEach(function(isin){
     var a=m1.get(isin),b=m2.get(isin);var status=a&&b?'Common':a?'\ud83c\udd95 Entered':'\ud83d\udd34 Exited';var cur=a||b;
@@ -1195,10 +1219,11 @@ function setupCompSort(){
 function fillCompTable(){
   var rows=window._compRows||[];
   var q=(document.getElementById('compSearch').value||'').toLowerCase().trim();
+  var st=document.getElementById('cfStatus').value;if(st)rows=rows.filter(function(r){return r.status===st;});
   var shown=q?rows.filter(function(r){return(r.name||'').toLowerCase().indexOf(q)>=0||(r.isin||'').toLowerCase().indexOf(q)>=0||(r.sector||'').toLowerCase().indexOf(q)>=0;}):rows;
   var cc=function(v){return v==null?'':v>0.001?'chg-up':v<-0.001?'chg-down':'chg-flat';};
   var cf=function(v,d){return v==null?'\u2014':(v>=0?'+':'')+v.toFixed(d);};
-  shown=compSortRows(shown);
+  shown=compSortRows(shown);window._compShown=shown;
   var h='<table class="data-table"><thead><tr>';
   for(var ci=0;ci<COMP_COLS.length;ci++){var col=COMP_COLS[ci];var scls=compSortCol===col.k?(compSortAsc?' class="sorted-asc"':' class="sorted-desc"'):'';h+='<th data-sort="'+col.k+'"'+scls+'>'+col.l+'</th>';}
   h+='</tr></thead><tbody>';
@@ -1240,8 +1265,8 @@ function setupCompSearch(){
   sug.addEventListener('mousedown',function(e){var it=e.target.closest('.ac-item');if(it){e.preventDefault();pick(it.getAttribute('data-name'));}});
   document.addEventListener('click',function(e){if(!e.target.closest('.ac-wrap'))closeSug();});
 }
-function exportCompCSV(){if(!window._compRows)return;var r=window._compRows;var c='\uFEFF'+'Instrument;Sector;Status;Price D2;Price D1;D Price;Weight D2;Weight D1;D Weight;D Delta;D Gamma;D Vega;D Impl Vol;D Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.div!=null?x.div.toFixed(2):'',x.ds!=null?x.ds.toFixed(0):''].join(';')+'\n';}var _cmp=[_cleanName(F1),_cleanName(F2)].filter(Boolean).join('_vs_');dl('data:text/csv;charset=utf-8,'+encodeURIComponent(c),'FTSE_Comparison'+(_cmp?'_'+_cmp:'')+'.csv');}
-function copyCompCSV(){if(!window._compRows)return;var r=window._compRows;var c='Instrument\tSector\tStatus\tPrice D2\tPrice D1\tD Price\tWeight D2\tWeight D1\tD Weight\tD Delta\tD Gamma\tD Vega\tD Impl Vol\tD Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.div!=null?x.div.toFixed(2):'',x.ds!=null?x.ds.toFixed(0):''].join('\t')+'\n';}cp(c,'Comparison');}
+function exportCompCSV(){if(!window._compRows)return;var r=window._compShown||window._compRows;var c='\uFEFF'+'Instrument;Sector;Status;Price D2;Price D1;D Price;Weight D2;Weight D1;D Weight;D Delta;D Gamma;D Vega;D Impl Vol;D Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.div!=null?x.div.toFixed(2):'',x.ds!=null?x.ds.toFixed(0):''].join(';')+'\n';}var _cmp=[_cleanName(F1),_cleanName(F2)].filter(Boolean).join('_vs_');dl('data:text/csv;charset=utf-8,'+encodeURIComponent(c),'FTSE_Comparison'+(_cmp?'_'+_cmp:'')+'.csv');}
+function copyCompCSV(){if(!window._compRows)return;var r=window._compShown||window._compRows;var c='Instrument\tSector\tStatus\tPrice D2\tPrice D1\tD Price\tWeight D2\tWeight D1\tD Weight\tD Delta\tD Gamma\tD Vega\tD Impl Vol\tD Spread\n';for(var i=0;i<r.length;i++){var x=r[i];c+=[x.name,x.sector||'',x.status,F$(x.p2,2),F$(x.p1,2),x.dp!=null?x.dp.toFixed(2):'',F$(x.w2,3),F$(x.w1,3),x.dw!=null?x.dw.toFixed(3):'',x.dd!=null?x.dd.toFixed(1):'',x.dg!=null?x.dg.toFixed(3):'',x.dv!=null?x.dv.toFixed(3):'',x.div!=null?x.div.toFixed(2):'',x.ds!=null?x.ds.toFixed(0):''].join('\t')+'\n';}cp(c,'Comparison');}
 
 
 
