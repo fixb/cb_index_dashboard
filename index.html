@@ -151,6 +151,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .wif-kpi .sub{font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--text-dim);margin-top:0.25rem}
 .wif-kpi .value.pos{color:var(--green)}.wif-kpi .value.neg{color:var(--red)}.wif-kpi .value.flat{color:var(--text-dim)}
 #cvxKpis{grid-template-columns:repeat(6,1fr)}@media(max-width:1200px){#cvxKpis{grid-template-columns:repeat(3,1fr)}}@media(max-width:600px){#cvxKpis{grid-template-columns:repeat(2,1fr)}}
+.cvx-rng{display:inline-flex;align-items:center;gap:0.3rem;font-size:0.65rem;color:var(--text-dim)}
+.filter-bar .cvx-rng input{flex:none;width:58px;min-width:0;padding:0.4rem 0.35rem;font-size:0.72rem;text-align:center}
 .cvx-note{font-size:0.68rem;color:var(--text-dim);margin-top:0.7rem;line-height:1.45}
 .cvx-legend{display:flex;flex-wrap:wrap;gap:0.35rem 1rem;margin-top:0.7rem;font-size:0.68rem;color:var(--text-muted)}
 .cvx-legend span{display:inline-flex;align-items:center;gap:0.35rem}.cvx-legend b{font-weight:400}
@@ -269,6 +271,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="chart-wrap" style="height:360px"><canvas id="scatterChart"></canvas></div>
     </div></div><div id="binSelBar" class="binsel-bar" style="display:none"></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Delta distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="deltaHist"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Spread distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="spreadHist"></canvas></div></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Premium distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="premiumHist"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Impl. Vol. distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="volHist"></canvas></div></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>Input Vol distribution</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="volDiffHist"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Gamma exposure distribution (Γ × weight)</h3></div><div class="card-body"><div class="chart-wrap"><canvas id="gammaHist"></canvas></div></div></div></div><div class="grid-2"><div class="card"><div class="card-header"><h3>YTM distribution</h3></div><div class="card-body"><div class="chart-wrap" style="height:300px"><canvas id="ytmHist"></canvas></div></div></div><div class="card"><div class="card-header"><h3>Gamma concentration (Lorenz)</h3><span class="tag" id="gammaGiniTag" style="margin-left:0.5rem"></span></div><div class="card-body"><div class="chart-wrap" style="height:300px"><canvas id="gammaLorenz"></canvas></div></div></div></div><div class="card"><div class="card-header"><h3>Constituents — selection</h3><div style="display:flex;align-items:center;gap:0.7rem;flex-wrap:wrap"><span class="tag">reflects active filters & bin selection</span><span class="tag tag-green" id="distListTag"></span><button class="btn btn-green" onclick="exportDistXLSX()" title="Exporter la sélection + cartouche + distributions en Excel">⬇ Excel</button></div></div><div class="card-body"><div class="scroll-x scroll-y-table"><table class="data-table" id="distListTable"><thead><tr><th data-sort="_dn">Instrument</th><th data-sort="Sector">Sector</th><th data-sort="Country">Country</th><th data-sort="Bond Currency">Currency</th><th data-sort="Convertible Price">CB Price</th><th data-sort="Index Weight">Weight %</th><th data-sort="Market Cap (USDm)">MV (USDm)</th><th data-sort="Delta">Delta</th><th data-sort="Gamma">Gamma</th><th data-sort="Vega">Vega</th><th data-sort="Rho (10bp)">Rho</th><th data-sort="Credit Spread">Spread</th><th data-sort="Yield to Mat/Put">YTM %</th><th data-sort="Implied Vol.">Impl. Vol.</th><th data-sort="Input Vol.">Input Vol.</th><th data-sort="Edge to Theo.">Edge %</th><th data-sort="Conversion Premium">Premium %</th><th data-sort="Parity">Parity</th><th data-sort="Duration">Duration</th><th title="Open in cb_pricer">↗</th></tr></thead><tbody id="distListBody"></tbody></table></div></div></div><div class="card" style="font-size:0.72rem;line-height:1.5"><div class="card-header"><h3 style="font-size:0.78rem">FTSE Global Focus — Index rules</h3></div><div class="card-body" style="color:var(--text-dim);display:grid;grid-template-columns:1fr 1fr;gap:1rem"><div><div style="color:var(--text);font-weight:600;margin-bottom:0.3rem">Retention (drop rules)</div><ul style="margin:0;padding-left:1rem"><li>Conversion Premium ≤ 100%</li><li>CB Price &gt; 60% and &lt; 140%</li></ul></div><div><div style="color:var(--text);font-weight:600;margin-bottom:0.3rem">Addition (inclusion rules)</div><ul style="margin:0;padding-left:1rem"><li>Conversion Premium &lt; 75%</li><li>CB Price &gt; 70% and &lt; 125%</li><li>Min size: US $500m · Europe €375m (≈$433m) · Asia ex-Japan $275m · Japan ¥22bn (≈$150m)</li></ul></div></div></div></div>
     <div class="panel" id="panel-convexity">
+      <div class="card"><div class="card-header"><h3>Filters</h3><div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap"><span class="tag tag-green" id="cvxFiltTag"></span><button class="btn" onclick="cvxResetFilters();renderConvexity()">↻ Reset</button></div></div><div class="card-body"><div class="filter-bar" style="margin-bottom:0"><select id="cvxRegion" onchange="renderConvexity()"></select><select id="cvxCountry" onchange="renderConvexity()"></select><select id="cvxSector" onchange="renderConvexity()"></select><select id="cvxCcy" onchange="renderConvexity()"></select><span class="cvx-rng"><span class="sf-label">Delta</span><input type="number" class="sf-num" id="cvxDeltaMin" placeholder="min" onchange="renderConvexity()"><span>—</span><input type="number" class="sf-num" id="cvxDeltaMax" placeholder="max" onchange="renderConvexity()"></span><span class="cvx-rng"><span class="sf-label">Spread (bps)</span><input type="number" class="sf-num" id="cvxSpreadMin" placeholder="min" onchange="renderConvexity()"><span>—</span><input type="number" class="sf-num" id="cvxSpreadMax" placeholder="max" onchange="renderConvexity()"></span><span class="cvx-rng"><span class="sf-label">Duration (y)</span><input type="number" class="sf-num" id="cvxDurMin" placeholder="min" onchange="renderConvexity()"><span>—</span><input type="number" class="sf-num" id="cvxDurMax" placeholder="max" onchange="renderConvexity()"></span></div></div></div>
       <div class="card"><div class="card-header"><h3>Index convexity</h3><div class="btn-group" id="cvxHorizon" style="display:flex;gap:0.3rem;align-items:center"><span class="tag">±1σ horizon</span><button class="btn" data-h="5" onclick="setCvxHorizon(this)">1 week</button><button class="btn btn-accent" data-h="21" onclick="setCvxHorizon(this)">1 month</button><button class="btn" data-h="63" onclick="setCvxHorizon(this)">3 months</button></div></div><div class="card-body"><div class="wif-kpis" id="cvxKpis"></div><p class="cvx-note" id="cvxNote"></p></div></div>
       <div class="grid-2">
         <div class="card"><div class="card-header"><h3>Composite convertible: price vs parity</h3></div><div class="card-body"><div class="chart-wrap" style="height:380px"><canvas id="cvxPriceChart"></canvas></div>
@@ -510,6 +513,7 @@ function launchDashboard(){
   else{var c2=document.getElementById('chip2');if(c2)c2.style.display='none';var tc=document.getElementById('tabCompare');if(tc)tc.style.display='none';var cl=document.getElementById('sfCmpLabel');var cd=document.getElementById('sfCmp');if(cl)cl.style.display='none';if(cd)cd.style.display='none';}
   // Default the Compare mode to overlay both files when a second file is loaded (Lorenz, histograms, scatter).
   compareMode=D2?'Both':'D1';
+  cvxResetFilters();
   var _cb=document.querySelectorAll('#sfCmp .btn');for(var i=0;i<_cb.length;i++)_cb[i].classList.toggle('btn-accent',_cb[i].getAttribute('data-cmp')===compareMode);
   // Reset to overview tab
   var tabs=document.querySelectorAll('.tab');for(var i=0;i<tabs.length;i++)tabs[i].classList.remove('active');
@@ -645,6 +649,38 @@ function cvxProfile(data){
   return{pts:pts,j0:50,jMax:jMax,iv:ww?vw/ww:25,n:legs.length,skipped:skipped,
     at:function(mv){return pts[Math.round((Math.min(1,Math.max(-0.5,mv))+0.5)/0.01)];}};
 }
+var CVX_SEL=[{id:'cvxRegion',k:'Region',all:'All regions'},{id:'cvxCountry',k:'Country',all:'All countries'},{id:'cvxSector',k:'Sector',all:'All sectors'},{id:'cvxCcy',k:'Bond Currency',all:'All currencies'}];
+var CVX_RNG=[{p:'cvxDelta',k:'Delta'},{p:'cvxSpread',k:'Credit Spread'},{p:'cvxDur',k:'Duration'}];
+function cvxFiltActive(){
+  for(var i=0;i<CVX_SEL.length;i++)if(document.getElementById(CVX_SEL[i].id).value)return true;
+  for(var i=0;i<CVX_RNG.length;i++)if(document.getElementById(CVX_RNG[i].p+'Min').value!==''||document.getElementById(CVX_RNG[i].p+'Max').value!=='')return true;
+  return false;
+}
+// skipKey leaves one select out, so its options can be narrowed by the other active filters.
+function cvxFilter(D,skipKey){
+  var sel=[],rng=[];
+  for(var i=0;i<CVX_SEL.length;i++){if(CVX_SEL[i].k===skipKey)continue;var v=document.getElementById(CVX_SEL[i].id).value;if(v)sel.push([CVX_SEL[i].k,v]);}
+  for(var i=0;i<CVX_RNG.length;i++){var a=parseFloat(document.getElementById(CVX_RNG[i].p+'Min').value),b=parseFloat(document.getElementById(CVX_RNG[i].p+'Max').value);if(!isNaN(a)||!isNaN(b))rng.push([CVX_RNG[i].k,isNaN(a)?-Infinity:a,isNaN(b)?Infinity:b]);}
+  if(!sel.length&&!rng.length)return D;
+  return D.filter(function(d){
+    for(var j=0;j<sel.length;j++)if((d[sel[j][0]]||'')!==sel[j][1])return false;
+    for(var j=0;j<rng.length;j++){var x=V(d[rng[j][0]]);if(x==null||x<rng[j][1]||x>rng[j][2])return false;}
+    return true;
+  });
+}
+function cvxSyncSelects(){
+  for(var i=0;i<CVX_SEL.length;i++){var c=CVX_SEL[i],el=document.getElementById(c.id),cur=el.value,set={};
+    var a=cvxFilter(D1,c.k),b=D2?cvxFilter(D2,c.k):[];
+    for(var j=0;j<a.length;j++)if(a[j][c.k])set[a[j][c.k]]=1;for(var j=0;j<b.length;j++)if(b[j][c.k])set[b[j][c.k]]=1;
+    if(cur)set[cur]=1; // keep the current choice visible, even with nothing left under the other filters
+    var vals=Object.keys(set).sort(),h='<option value="">'+c.all+'</option>';
+    for(var j=0;j<vals.length;j++)h+='<option value="'+vals[j]+'"'+(vals[j]===cur?' selected':'')+'>'+vals[j]+'</option>';
+    el.innerHTML=h;}
+}
+function cvxResetFilters(){
+  for(var i=0;i<CVX_SEL.length;i++)document.getElementById(CVX_SEL[i].id).value='';
+  for(var i=0;i<CVX_RNG.length;i++){document.getElementById(CVX_RNG[i].p+'Min').value='';document.getElementById(CVX_RNG[i].p+'Max').value='';}
+}
 function setCvxHorizon(btn){cvxHorizon=+btn.getAttribute('data-h');var bs=document.querySelectorAll('#cvxHorizon .btn');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('btn-accent',bs[i]===btn);renderConvexity();}
 function _cvxSign(v,d){return(v>=0?'+':'−')+Math.abs(v).toFixed(d);}
 // Shaded +/-1 sigma range and text labels next to the marker points.
@@ -670,7 +706,15 @@ function _cvxMarker(x,y,color,label,o){var ds={data:[{x:x,y:y}],pointRadius:5,po
 function renderConvexity(){
   if(!D1||typeof Chart==='undefined')return;
   _cvxRegisterHover();
-  var C=cvxProfile(D1),B=D2?cvxProfile(D2):null;if(!C)return;
+  cvxSyncSelects();
+  var fA=cvxFilter(D1),C=cvxProfile(fA),B=D2?cvxProfile(cvxFilter(D2)):null;
+  document.getElementById('cvxFiltTag').textContent=cvxFiltActive()?fA.length+' / '+D1.length+' CBs · '+(sumW(fA)/sumW(D1)*100).toFixed(1)+'% of index':'';
+  if(!C){
+    ['cvxPriceChart','cvxDeltaChart'].forEach(function(id){var e=Chart.getChart(id);if(e)e.destroy();});
+    ['cvxKpis','cvxRegLegend','cvxTable'].forEach(function(id){document.getElementById(id).innerHTML='';});
+    document.getElementById('cvxNote').textContent='No instrument matches these filters.';
+    return;
+  }
   var P=C.pts,p0=P[C.j0],pM=P[C.jMax],b0=B&&B.pts[B.j0],bM=B&&B.pts[B.jMax];
   var sig=C.iv/100*Math.sqrt(cvxHorizon/252),band=[Math.exp(-sig)-1,Math.exp(sig)-1];
   var part=function(X,z){var u=X.at(0.2),d=X.at(-0.2);return{u:(u.price-z.price)/(u.parity-z.parity)*100,d:(d.price-z.price)/(d.parity-z.parity)*100};};
@@ -685,15 +729,17 @@ function renderConvexity(){
     tile('Conversion premium',((p0.price/p0.parity-1)*100).toFixed(1)+'%','price '+p0.price.toFixed(2)+' · parity '+p0.parity.toFixed(2)+bTxt(b0?((b0.price/b0.parity-1)*100).toFixed(1)+'%':''))+
     tile('Premium over floor',((p0.price/p0.floor-1)*100).toFixed(1)+'%','floor '+p0.floor.toFixed(2)+bTxt(b0?((b0.price/b0.floor-1)*100).toFixed(1)+'%':''))+
     tile('Participation ±20%',pt.u.toFixed(0)+' / '+pt.d.toFixed(0),'up / down, % of parity move'+bTxt(pb?pb.u.toFixed(0)+' / '+pb.d.toFixed(0):''));
-  document.getElementById('cvxNote').textContent='Composite of '+C.n+' CBs'+(C.skipped?' ('+C.skipped+' left out: missing price, parity, delta or weight)':'')+', in points per 100 nominal, index-weighted. Shaded: ±1σ equity move over '+cvxHorizon+' trading days at the composite implied vol of '+C.iv.toFixed(1)+'% (±'+(sig*100).toFixed(1)+'%).';
+  document.getElementById('cvxNote').textContent='Composite of '+C.n+' CBs'+(cvxFiltActive()?' (filtered, weights rescaled to the selection)':'')+(C.skipped?' ('+C.skipped+' left out: missing price, parity, delta or weight)':'')+', in points per 100 nominal, index-weighted. Shaded: ±1σ equity move over '+cvxHorizon+' trading days at the composite implied vol of '+C.iv.toFixed(1)+'% (±'+(sig*100).toFixed(1)+'%).';
 
   // Bubbles: one per constituent, sized by weight; same region colours as the Distributions scatter.
-  var byReg={},wMax=0;
-  for(var i=0;i<D1.length;i++){var w=V(D1[i]['Index Weight']);if(w>wMax)wMax=w;}
-  for(var i=0;i<D1.length;i++){var d=D1[i],x=V(d.Parity),y=V(d['Convertible Price']),w=V(d['Index Weight']);if(x==null||y==null||!(w>0))continue;var rk=d.Region||'—';if(!byReg[rk])byReg[rk]={pts:[],w:0};byReg[rk].pts.push({x:x,y:y,r:2+8*Math.sqrt(w/wMax),d:d});byReg[rk].w+=w;}
+  // Size scale and colours come from the whole index so they do not shift when filtering.
+  var byReg={},wMax=0,regSet={};
+  for(var i=0;i<D1.length;i++){var w=V(D1[i]['Index Weight']);if(w>wMax)wMax=w;regSet[D1[i].Region||'—']=1;}
+  var allRegs=Object.keys(regSet).sort();
+  for(var i=0;i<fA.length;i++){var d=fA[i],x=V(d.Parity),y=V(d['Convertible Price']),w=V(d['Index Weight']);if(x==null||y==null||!(w>0))continue;var rk=d.Region||'—';if(!byReg[rk])byReg[rk]={pts:[],w:0};byReg[rk].pts.push({x:x,y:y,r:2+8*Math.sqrt(w/wMax),d:d});byReg[rk].w+=w;}
   var regs=Object.keys(byReg).sort(),bubbleDs=[],regLeg='',wTot=0;
   for(var i=0;i<regs.length;i++)wTot+=byReg[regs[i]].w;
-  for(var i=0;i<regs.length;i++){var col=CL[i%CL.length],rg=byReg[regs[i]];bubbleDs.push({type:'bubble',label:regs[i],data:rg.pts,backgroundColor:col+'26',borderColor:col+'b3',borderWidth:1,order:4,_bubble:true});regLeg+='<span><i style="background:'+col+';border-radius:50%"></i>'+regs[i]+' · '+(rg.w/wTot*100).toFixed(1)+'%</span>';}
+  for(var i=0;i<regs.length;i++){var col=CL[allRegs.indexOf(regs[i])%CL.length],rg=byReg[regs[i]];bubbleDs.push({type:'bubble',label:regs[i],data:rg.pts,backgroundColor:col+'26',borderColor:col+'b3',borderWidth:1,order:4,_bubble:true});regLeg+='<span><i style="background:'+col+';border-radius:50%"></i>'+regs[i]+' · '+(rg.w/wTot*100).toFixed(1)+'%</span>';}
   document.getElementById('cvxRegLegend').innerHTML=regLeg;
   var LBL_B=B?(F2||'D2'):'';
   document.getElementById('cvxD2Leg1').style.display=B?'':'none';document.getElementById('cvxD2Leg2').style.display=B?'':'none';
