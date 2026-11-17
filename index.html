@@ -274,9 +274,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="card"><div class="card-header"><h3>Filters</h3><div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap"><span class="tag tag-green" id="cvxFiltTag"></span><button class="btn" onclick="cvxResetFilters();renderConvexity()">↻ Reset</button></div></div><div class="card-body"><div class="filter-bar" style="margin-bottom:0"><select id="cvxRegion" onchange="renderConvexity()"></select><select id="cvxCountry" onchange="renderConvexity()"></select><select id="cvxSector" onchange="renderConvexity()"></select><select id="cvxCcy" onchange="renderConvexity()"></select><span class="cvx-rng"><span class="sf-label">Delta</span><input type="number" class="sf-num" id="cvxDeltaMin" placeholder="min" onchange="renderConvexity()"><span>—</span><input type="number" class="sf-num" id="cvxDeltaMax" placeholder="max" onchange="renderConvexity()"></span><span class="cvx-rng"><span class="sf-label">Spread (bps)</span><input type="number" class="sf-num" id="cvxSpreadMin" placeholder="min" onchange="renderConvexity()"><span>—</span><input type="number" class="sf-num" id="cvxSpreadMax" placeholder="max" onchange="renderConvexity()"></span><span class="cvx-rng"><span class="sf-label">Duration (y)</span><input type="number" class="sf-num" id="cvxDurMin" placeholder="min" onchange="renderConvexity()"><span>—</span><input type="number" class="sf-num" id="cvxDurMax" placeholder="max" onchange="renderConvexity()"></span></div></div></div>
       <div class="card"><div class="card-header"><h3>Index convexity</h3><div class="btn-group" id="cvxHorizon" style="display:flex;gap:0.3rem;align-items:center"><span class="tag">±1σ horizon</span><button class="btn" data-h="5" onclick="setCvxHorizon(this)">1 week</button><button class="btn btn-accent" data-h="21" onclick="setCvxHorizon(this)">1 month</button><button class="btn" data-h="63" onclick="setCvxHorizon(this)">3 months</button></div></div><div class="card-body"><div class="wif-kpis" id="cvxKpis"></div><p class="cvx-note" id="cvxNote"></p></div></div>
       <div class="grid-2">
-        <div class="card"><div class="card-header"><h3>Composite convertible: price vs parity</h3><button class="btn" onclick="cvxResetZoom('cvxPriceChart')">↻ Reset zoom</button></div><div class="card-body"><div class="chart-wrap" style="height:380px"><canvas id="cvxPriceChart"></canvas></div>
+        <div class="card"><div class="card-header"><h3>Composite convertible: price vs parity</h3><div class="btn-group" id="cvxBubbleSize" style="display:flex;gap:0.3rem;align-items:center;flex-wrap:wrap"><span class="tag">Bubble size</span><button class="btn btn-accent" data-s="weight" onclick="setCvxBubbleSize(this)">Weight</button><button class="btn" data-s="spread" onclick="setCvxBubbleSize(this)">Credit spread</button><button class="btn" onclick="cvxResetZoom('cvxPriceChart')">↻ Reset zoom</button></div></div><div class="card-body"><div class="chart-wrap" style="height:380px"><canvas id="cvxPriceChart"></canvas></div>
           <div class="cvx-legend"><span><i style="background:#f8fafc"></i>Composite price</span><span><i style="background:#64748b"></i>Parity (45°) and bond floor</span><span id="cvxD2Leg1" style="display:none"><i style="background:#fb923c"></i><b></b></span><span><i style="background:rgba(148,163,184,0.35)"></i>±1σ move</span></div>
-          <div class="cvx-legend" id="cvxRegLegend"></div><p class="cvx-note">Bubbles: constituents, sized by index weight, coloured by region.</p><p class="cvx-note">Zoom: drag a box, or pinch / ctrl + scroll. Shift + drag to pan. Double-click or ↻ to reset.</p></div></div>
+          <div class="cvx-legend" id="cvxRegLegend"></div><p class="cvx-note" id="cvxBubbleNote">Bubbles: constituents, sized by index weight, coloured by region.</p><p class="cvx-note">Zoom: drag a box, or pinch / ctrl + scroll. Shift + drag to pan. Double-click or ↻ to reset.</p></div></div>
         <div class="card"><div class="card-header"><h3>Delta and gamma vs equity move</h3><button class="btn" onclick="cvxResetZoom('cvxDeltaChart')">↻ Reset zoom</button></div><div class="card-body"><div class="chart-wrap" style="height:380px"><canvas id="cvxDeltaChart"></canvas></div>
           <div class="cvx-legend"><span><i style="background:#f8fafc"></i>Composite δ, %</span><span><i style="background:#22d3ee"></i>Composite gamma (right axis)</span><span id="cvxD2Leg2" style="display:none"><i style="background:#fb923c"></i><b></b></span><span><i style="background:rgba(148,163,184,0.35)"></i>±1σ move</span></div></div></div>
       </div>
@@ -608,7 +608,7 @@ function buildDashboard(){
 // price, delta and gamma match the index file: d1 from delta, total vol v = sigma*sqrt(T) from gamma
 // (Gamma = phi(d1)/v in delta points per 1%), strike from d1 and v. The composite holds units proportional
 // to index weight / price. Credit is held constant, so the downside flattens towards the implied floor.
-var cvxHorizon=21;
+var cvxHorizon=21,cvxBubbleSize='weight';
 function _normPdf(x){return Math.exp(-x*x/2)/Math.sqrt(2*Math.PI);}
 function _normCdf(x){var t=1/(1+0.2316419*Math.abs(x)),y=t*(0.319381530+t*(-0.356563782+t*(1.781477937+t*(-1.821255978+t*1.330274429))));var p=1-_normPdf(x)*y;return x>=0?p:1-p;}
 function _invNorm(p){ // Acklam's rational approximation
@@ -683,6 +683,7 @@ function cvxResetFilters(){
   for(var i=0;i<CVX_SEL.length;i++)document.getElementById(CVX_SEL[i].id).value='';
   for(var i=0;i<CVX_RNG.length;i++){document.getElementById(CVX_RNG[i].p+'Min').value='';document.getElementById(CVX_RNG[i].p+'Max').value='';}
 }
+function setCvxBubbleSize(btn){cvxBubbleSize=btn.getAttribute('data-s');var bs=document.querySelectorAll('#cvxBubbleSize .btn[data-s]');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('btn-accent',bs[i]===btn);renderConvexity();}
 function setCvxHorizon(btn){cvxHorizon=+btn.getAttribute('data-h');var bs=document.querySelectorAll('#cvxHorizon .btn');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('btn-accent',bs[i]===btn);renderConvexity();}
 function _cvxSign(v,d){return(v>=0?'+':'−')+Math.abs(v).toFixed(d);}
 // Shaded +/-1 sigma range and text labels next to the marker points.
@@ -741,10 +742,13 @@ function renderConvexity(){
 
   // Bubbles: one per constituent, sized by weight; same region colours as the Distributions scatter.
   // Size scale and colours come from the whole index so they do not shift when filtering.
-  var byReg={},wMax=0,regSet={};
-  for(var i=0;i<D1.length;i++){var w=V(D1[i]['Index Weight']);if(w>wMax)wMax=w;regSet[D1[i].Region||'—']=1;}
+  // Size: index weight or credit spread (area proportional to the value; missing or negative spread = smallest bubble).
+  var sizeF=cvxBubbleSize==='spread'?'Credit Spread':'Index Weight';
+  var byReg={},sMax=0,regSet={};
+  for(var i=0;i<D1.length;i++){var sv=V(D1[i][sizeF]);if(sv>sMax)sMax=sv;regSet[D1[i].Region||'—']=1;}
   var allRegs=Object.keys(regSet).sort();
-  for(var i=0;i<fA.length;i++){var d=fA[i],x=V(d.Parity),y=V(d['Convertible Price']),w=V(d['Index Weight']);if(x==null||y==null||!(w>0))continue;var rk=d.Region||'—';if(!byReg[rk])byReg[rk]={pts:[],w:0};byReg[rk].pts.push({x:x,y:y,r:2+8*Math.sqrt(w/wMax),d:d});byReg[rk].w+=w;}
+  for(var i=0;i<fA.length;i++){var d=fA[i],x=V(d.Parity),y=V(d['Convertible Price']),w=V(d['Index Weight']),sv=V(d[sizeF]);if(x==null||y==null||!(w>0))continue;var rk=d.Region||'—';if(!byReg[rk])byReg[rk]={pts:[],w:0};byReg[rk].pts.push({x:x,y:y,r:2+8*Math.sqrt(sv>0&&sMax>0?sv/sMax:0),d:d});byReg[rk].w+=w;}
+  document.getElementById('cvxBubbleNote').textContent='Bubbles: constituents, sized by '+(cvxBubbleSize==='spread'?'credit spread':'index weight')+', coloured by region.';
   var regs=Object.keys(byReg).sort(),bubbleDs=[],regLeg='',wTot=0;
   for(var i=0;i<regs.length;i++)wTot+=byReg[regs[i]].w;
   for(var i=0;i<regs.length;i++){var col=CL[allRegs.indexOf(regs[i])%CL.length],rg=byReg[regs[i]];bubbleDs.push({type:'bubble',label:regs[i],data:rg.pts,backgroundColor:col+'26',borderColor:col+'b3',borderWidth:1,order:4,_bubble:true});regLeg+='<span><i style="background:'+col+';border-radius:50%"></i>'+regs[i]+' · '+(rg.w/wTot*100).toFixed(1)+'%</span>';}
@@ -768,7 +772,7 @@ function renderConvexity(){
     plugins:{legend:{display:false},zoom:_cvxZoomOpts(),tooltip:{displayColors:false,callbacks:{
       title:function(it){var o=it[0];return o.dataset._bubble?o.raw.d._dn:'Equity '+_cvxSign(P[o.dataIndex].m*100,0)+'%';},
       label:function(o){
-        if(o.dataset._bubble){var d=o.raw.d;return[row('Weight',F$(V(d['Index Weight']),2)+'%'),row('Price',F$(V(d['Convertible Price']),2)),row('Parity',F$(V(d.Parity),2)),row('Premium',F$(V(d['Conversion Premium']),1)+'%'),row('Delta',F$(V(d.Delta),1)+'%'),row('Gamma',F$(V(d.Gamma),2)),(d.Region||'—')+' · '+(d.Sector||'—')];}
+        if(o.dataset._bubble){var d=o.raw.d;return[row('Weight',F$(V(d['Index Weight']),2)+'%'),row('Price',F$(V(d['Convertible Price']),2)),row('Parity',F$(V(d.Parity),2)),row('Premium',F$(V(d['Conversion Premium']),1)+'%'),row('Delta',F$(V(d.Delta),1)+'%'),row('Gamma',F$(V(d.Gamma),2)),row('Spread',F$(V(d['Credit Spread']),0)+' bps'),(d.Region||'—')+' · '+(d.Sector||'—')];}
         var p=P[o.dataIndex];return[row('Price',p.price.toFixed(2)),row('Parity',p.parity.toFixed(2)),row('Floor',p.floor.toFixed(2)),row('Premium',((p.price/p.parity-1)*100).toFixed(1)+'%'),row('Delta',p.delta.toFixed(1)+'%')];
       }}}},
     scales:{x:{type:'linear',title:{display:true,text:'Composite parity'},grid:{display:false}},y:{title:{display:true,text:'Price'}}}}});
